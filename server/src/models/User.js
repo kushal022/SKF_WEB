@@ -1,0 +1,62 @@
+const crypto = require('crypto');
+const { Model } = require('../db');
+
+class User extends Model {
+  static get tableName() {
+    return 'users';
+  }
+
+  $beforeInsert() {
+    if (!this.public_id) {
+      this.public_id = crypto.randomUUID();
+    }
+    const now = new Date();
+    if (!this.created_at) {
+      this.created_at = now;
+    }
+    if (!this.updated_at) {
+      this.updated_at = now;
+    }
+  }
+
+  $beforeUpdate() {
+    this.updated_at = new Date();
+  }
+
+  static get jsonSchema() {
+    return {
+      type: 'object',
+      required: ['name', 'password_hash'],
+      properties: {
+        id: { type: ['integer', 'string'] },
+        public_id: { type: 'string', minLength: 36, maxLength: 36 },
+        name: { type: 'string', minLength: 1, maxLength: 150 },
+        email: { type: ['string', 'null'], maxLength: 255 },
+        phone: { type: ['string', 'null'], maxLength: 20 },
+        password_hash: { type: 'string', maxLength: 255 },
+        role: { type: 'string', maxLength: 30, default: 'admin' },
+        status: { type: 'string', maxLength: 30, default: 'active' },
+        last_login_at: { type: ['string', 'object', 'null'] },
+        created_at: { type: ['string', 'object'] },
+        updated_at: { type: ['string', 'object'] },
+        deleted_at: { type: ['string', 'object', 'null'] },
+      },
+    };
+  }
+
+  static get relationMappings() {
+    const Session = require('./Session');
+    return {
+      sessions: {
+        relation: Model.HasManyRelation,
+        modelClass: Session,
+        join: {
+          from: 'users.id',
+          to: 'sessions.user_id',
+        },
+      },
+    };
+  }
+}
+
+module.exports = User;
