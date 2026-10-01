@@ -150,6 +150,14 @@ class Product extends Model {
           to: 'reviews.product_id',
         },
       },
+      quotationItems: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./QuotationItem'),
+        join: {
+          from: 'products.id',
+          to: 'quotation_items.product_id',
+        },
+      },
     };
   }
 }

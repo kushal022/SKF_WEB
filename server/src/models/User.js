@@ -101,6 +101,22 @@ class User extends Model {
           to: 'enquiry_follow_ups.assigned_to',
         },
       },
+      createdQuotations: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./Quotation'),
+        join: {
+          from: 'users.id',
+          to: 'quotations.created_by',
+        },
+      },
+      quotationStatusChanges: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./QuotationStatusLog'),
+        join: {
+          from: 'users.id',
+          to: 'quotation_status_logs.changed_by',
+        },
+      },
     };
   }
 }

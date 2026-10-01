@@ -21,6 +21,9 @@ const B2BPricingRule = require('./B2BPricingRule');
 const Gallery = require('./Gallery');
 const GalleryImage = require('./GalleryImage');
 const Review = require('./Review');
+const Quotation = require('./Quotation');
+const QuotationItem = require('./QuotationItem');
+const QuotationStatusLog = require('./QuotationStatusLog');
 
 module.exports = {
   User,
@@ -46,4 +49,7 @@ module.exports = {
   Gallery,
   GalleryImage,
   Review,
+  Quotation,
+  QuotationItem,
+  QuotationStatusLog,
 };

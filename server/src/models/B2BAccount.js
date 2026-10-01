@@ -94,6 +94,14 @@ class B2BAccount extends Model {
           to: 'b2b_pricing_rules.discount_tier',
         },
       },
+      quotations: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./Quotation'),
+        join: {
+          from: 'b2b_accounts.id',
+          to: 'quotations.b2b_account_id',
+        },
+      },
     };
   }
 }

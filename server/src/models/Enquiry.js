@@ -120,6 +120,14 @@ class Enquiry extends Model {
           to: 'enquiry_follow_ups.enquiry_id',
         },
       },
+      quotations: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./Quotation'),
+        join: {
+          from: 'enquiries.id',
+          to: 'quotations.enquiry_id',
+        },
+      },
     };
   }
 }
