@@ -1,0 +1,23 @@
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
