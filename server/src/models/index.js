@@ -18,6 +18,9 @@ const EstimatorRule = require('./EstimatorRule');
 const B2BAccount = require('./B2BAccount');
 const B2BDocument = require('./B2BDocument');
 const B2BPricingRule = require('./B2BPricingRule');
+const Gallery = require('./Gallery');
+const GalleryImage = require('./GalleryImage');
+const Review = require('./Review');
 
 module.exports = {
   User,
@@ -40,4 +43,7 @@ module.exports = {
   B2BAccount,
   B2BDocument,
   B2BPricingRule,
+  Gallery,
+  GalleryImage,
+  Review,
 };

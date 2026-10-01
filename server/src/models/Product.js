@@ -91,6 +91,7 @@ class Product extends Model {
     const ProductSpec = require('./ProductSpec');
     const Enquiry = require('./Enquiry');
     const B2BPricingRule = require('./B2BPricingRule');
+    const Review = require('./Review');
 
     return {
       category: {
@@ -139,6 +140,14 @@ class Product extends Model {
         join: {
           from: 'products.id',
           to: 'b2b_pricing_rules.product_id',
+        },
+      },
+      reviews: {
+        relation: Model.HasManyRelation,
+        modelClass: Review,
+        join: {
+          from: 'products.id',
+          to: 'reviews.product_id',
         },
       },
     };
