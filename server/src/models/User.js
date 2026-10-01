@@ -46,6 +46,9 @@ class User extends Model {
 
   static get relationMappings() {
     const Session = require('./Session');
+    const ThemeSetting = require('./ThemeSetting');
+    const ThemePreset = require('./ThemePreset');
+
     return {
       sessions: {
         relation: Model.HasManyRelation,
@@ -53,6 +56,22 @@ class User extends Model {
         join: {
           from: 'users.id',
           to: 'sessions.user_id',
+        },
+      },
+      themeSettings: {
+        relation: Model.HasManyRelation,
+        modelClass: ThemeSetting,
+        join: {
+          from: 'users.id',
+          to: 'theme_settings.created_by',
+        },
+      },
+      themePresets: {
+        relation: Model.HasManyRelation,
+        modelClass: ThemePreset,
+        join: {
+          from: 'users.id',
+          to: 'theme_presets.created_by',
         },
       },
     };
