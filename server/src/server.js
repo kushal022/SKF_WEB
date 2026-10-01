@@ -1,18 +1,11 @@
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+/**
+ * Legacy Server Entry Point
+ * Delegates to src/index.js for clean modular server initialization.
+ */
+const { startServer } = require('./index');
 
-const app = require('./app');
-const { testConnection } = require('./db/test-connection');
-
-const PORT = process.env.PORT || 7000;
-
-async function startServer() {
-  // Test database connection at startup
-  await testConnection();
-
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+if (require.main === module) {
+  startServer();
 }
 
-startServer();
+module.exports = require('./index');
