@@ -12,6 +12,9 @@ const Enquiry = require('./Enquiry');
 const EnquiryNote = require('./EnquiryNote');
 const EnquiryStatusLog = require('./EnquiryStatusLog');
 const EnquiryFollowUp = require('./EnquiryFollowUp');
+const CustomRequest = require('./CustomRequest');
+const CustomRequestImage = require('./CustomRequestImage');
+const EstimatorRule = require('./EstimatorRule');
 
 module.exports = {
   User,
@@ -28,4 +31,7 @@ module.exports = {
   EnquiryNote,
   EnquiryStatusLog,
   EnquiryFollowUp,
+  CustomRequest,
+  CustomRequestImage,
+  EstimatorRule,
 };

@@ -77,6 +77,7 @@ class Enquiry extends Model {
     const EnquiryNote = require('./EnquiryNote');
     const EnquiryStatusLog = require('./EnquiryStatusLog');
     const EnquiryFollowUp = require('./EnquiryFollowUp');
+    const CustomRequest = require('./CustomRequest');
 
     return {
       product: {
@@ -85,6 +86,14 @@ class Enquiry extends Model {
         join: {
           from: 'enquiries.product_id',
           to: 'products.id',
+        },
+      },
+      customRequest: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: CustomRequest,
+        join: {
+          from: 'enquiries.custom_request_id',
+          to: 'custom_requests.id',
         },
       },
       notes: {
