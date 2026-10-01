@@ -90,6 +90,7 @@ class Product extends Model {
     const ProductVideo = require('./ProductVideo');
     const ProductSpec = require('./ProductSpec');
     const Enquiry = require('./Enquiry');
+    const B2BPricingRule = require('./B2BPricingRule');
 
     return {
       category: {
@@ -130,6 +131,14 @@ class Product extends Model {
         join: {
           from: 'products.id',
           to: 'enquiries.product_id',
+        },
+      },
+      b2bPricingRules: {
+        relation: Model.HasManyRelation,
+        modelClass: B2BPricingRule,
+        join: {
+          from: 'products.id',
+          to: 'b2b_pricing_rules.product_id',
         },
       },
     };

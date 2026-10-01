@@ -15,6 +15,9 @@ const EnquiryFollowUp = require('./EnquiryFollowUp');
 const CustomRequest = require('./CustomRequest');
 const CustomRequestImage = require('./CustomRequestImage');
 const EstimatorRule = require('./EstimatorRule');
+const B2BAccount = require('./B2BAccount');
+const B2BDocument = require('./B2BDocument');
+const B2BPricingRule = require('./B2BPricingRule');
 
 module.exports = {
   User,
@@ -34,4 +37,7 @@ module.exports = {
   CustomRequest,
   CustomRequestImage,
   EstimatorRule,
+  B2BAccount,
+  B2BDocument,
+  B2BPricingRule,
 };
