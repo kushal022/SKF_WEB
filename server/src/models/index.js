@@ -8,6 +8,10 @@ const Product = require('./Product');
 const ProductImage = require('./ProductImage');
 const ProductVideo = require('./ProductVideo');
 const ProductSpec = require('./ProductSpec');
+const Enquiry = require('./Enquiry');
+const EnquiryNote = require('./EnquiryNote');
+const EnquiryStatusLog = require('./EnquiryStatusLog');
+const EnquiryFollowUp = require('./EnquiryFollowUp');
 
 module.exports = {
   User,
@@ -20,4 +24,8 @@ module.exports = {
   ProductImage,
   ProductVideo,
   ProductSpec,
+  Enquiry,
+  EnquiryNote,
+  EnquiryStatusLog,
+  EnquiryFollowUp,
 };

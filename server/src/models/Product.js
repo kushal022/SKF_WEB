@@ -89,6 +89,7 @@ class Product extends Model {
     const ProductImage = require('./ProductImage');
     const ProductVideo = require('./ProductVideo');
     const ProductSpec = require('./ProductSpec');
+    const Enquiry = require('./Enquiry');
 
     return {
       category: {
@@ -121,6 +122,14 @@ class Product extends Model {
         join: {
           from: 'products.id',
           to: 'product_specs.product_id',
+        },
+      },
+      enquiries: {
+        relation: Model.HasManyRelation,
+        modelClass: Enquiry,
+        join: {
+          from: 'products.id',
+          to: 'enquiries.product_id',
         },
       },
     };

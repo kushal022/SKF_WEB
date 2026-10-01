@@ -48,6 +48,9 @@ class User extends Model {
     const Session = require('./Session');
     const ThemeSetting = require('./ThemeSetting');
     const ThemePreset = require('./ThemePreset');
+    const EnquiryNote = require('./EnquiryNote');
+    const EnquiryStatusLog = require('./EnquiryStatusLog');
+    const EnquiryFollowUp = require('./EnquiryFollowUp');
 
     return {
       sessions: {
@@ -72,6 +75,30 @@ class User extends Model {
         join: {
           from: 'users.id',
           to: 'theme_presets.created_by',
+        },
+      },
+      enquiryNotes: {
+        relation: Model.HasManyRelation,
+        modelClass: EnquiryNote,
+        join: {
+          from: 'users.id',
+          to: 'enquiry_notes.user_id',
+        },
+      },
+      enquiryStatusLogs: {
+        relation: Model.HasManyRelation,
+        modelClass: EnquiryStatusLog,
+        join: {
+          from: 'users.id',
+          to: 'enquiry_status_logs.changed_by',
+        },
+      },
+      assignedFollowUps: {
+        relation: Model.HasManyRelation,
+        modelClass: EnquiryFollowUp,
+        join: {
+          from: 'users.id',
+          to: 'enquiry_follow_ups.assigned_to',
         },
       },
     };
