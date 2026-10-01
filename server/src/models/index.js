@@ -28,6 +28,8 @@ const Order = require('./Order');
 const OrderItem = require('./OrderItem');
 const OrderStatusLog = require('./OrderStatusLog');
 const Payment = require('./Payment');
+const Notification = require('./Notification');
+const AuditLog = require('./AuditLog');
 
 module.exports = {
   User,
@@ -60,5 +62,7 @@ module.exports = {
   OrderItem,
   OrderStatusLog,
   Payment,
+  Notification,
+  AuditLog,
 };
 

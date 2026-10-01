@@ -125,6 +125,22 @@ class User extends Model {
           to: 'order_status_logs.changed_by',
         },
       },
+      notifications: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./Notification'),
+        join: {
+          from: 'users.id',
+          to: 'notifications.user_id',
+        },
+      },
+      auditLogs: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./AuditLog'),
+        join: {
+          from: 'users.id',
+          to: 'audit_logs.user_id',
+        },
+      },
     };
   }
 }
