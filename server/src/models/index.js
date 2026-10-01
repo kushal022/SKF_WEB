@@ -24,6 +24,10 @@ const Review = require('./Review');
 const Quotation = require('./Quotation');
 const QuotationItem = require('./QuotationItem');
 const QuotationStatusLog = require('./QuotationStatusLog');
+const Order = require('./Order');
+const OrderItem = require('./OrderItem');
+const OrderStatusLog = require('./OrderStatusLog');
+const Payment = require('./Payment');
 
 module.exports = {
   User,
@@ -52,4 +56,9 @@ module.exports = {
   Quotation,
   QuotationItem,
   QuotationStatusLog,
+  Order,
+  OrderItem,
+  OrderStatusLog,
+  Payment,
 };
+

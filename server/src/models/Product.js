@@ -158,6 +158,14 @@ class Product extends Model {
           to: 'quotation_items.product_id',
         },
       },
+      orderItems: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./OrderItem'),
+        join: {
+          from: 'products.id',
+          to: 'order_items.product_id',
+        },
+      },
     };
   }
 }

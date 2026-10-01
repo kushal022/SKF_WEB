@@ -142,6 +142,14 @@ class Quotation extends Model {
           to: 'users.id',
         },
       },
+      orders: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./Order'),
+        join: {
+          from: 'quotations.id',
+          to: 'orders.quotation_id',
+        },
+      },
     };
   }
 }

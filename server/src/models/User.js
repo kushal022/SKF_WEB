@@ -117,6 +117,14 @@ class User extends Model {
           to: 'quotation_status_logs.changed_by',
         },
       },
+      orderStatusChanges: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./OrderStatusLog'),
+        join: {
+          from: 'users.id',
+          to: 'order_status_logs.changed_by',
+        },
+      },
     };
   }
 }
