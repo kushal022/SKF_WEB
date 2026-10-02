@@ -6,6 +6,10 @@ class Session extends Model {
     return 'sessions';
   }
 
+  static get jsonAttributes() {
+    return [];
+  }
+
   $beforeInsert() {
     if (!this.public_id) {
       this.public_id = crypto.randomUUID();

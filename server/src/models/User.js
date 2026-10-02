@@ -6,6 +6,10 @@ class User extends Model {
     return 'users';
   }
 
+  static get jsonAttributes() {
+    return [];
+  }
+
   $beforeInsert() {
     if (!this.public_id) {
       this.public_id = crypto.randomUUID();
