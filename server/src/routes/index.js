@@ -3,6 +3,7 @@ const ApiResponse = require('../utils/apiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const { knex } = require('../db');
 const authRoutes = require('./auth.routes');
+const adminRoutes = require('./admin.routes');
 
 const router = express.Router();
 
@@ -39,5 +40,8 @@ router.get(
 
 // Mount Authentication & Session Routes (/api/v1/auth)
 router.use('/auth', authRoutes);
+
+// Mount Admin Routes (/api/v1/admin)
+router.use('/admin', adminRoutes);
 
 module.exports = router;

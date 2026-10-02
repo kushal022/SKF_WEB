@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node test-api-foundation.js && node test-auth.js",
+    "test": "node test-api-foundation.js && node test-auth.js && node test-admin.js",
     "test:auth": "node test-auth.js",
+    "test:admin": "node test-admin.js",
     "db:test": "node src/db/test-connection.js",
     "db:migrate": "knex --knexfile knexfile.js migrate:latest",
     "db:rollback": "knex --knexfile knexfile.js migrate:rollback",
