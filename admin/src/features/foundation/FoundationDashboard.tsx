@@ -154,7 +154,7 @@ export function FoundationDashboard() {
           <CardContent className="space-y-2.5 text-xs">
             <div className="flex justify-between items-center py-1 border-b border-[var(--border-border)]">
               <span className="text-[var(--text-secondary)]">Auth Store Status:</span>
-              <Badge variant="primary">{authState.status}</Badge>
+              <Badge variant="primary">{authState.isAuthenticated ? 'authenticated' : 'unauthenticated'}</Badge>
             </div>
             <div className="flex justify-between items-center py-1 border-b border-[var(--border-border)]">
               <span className="text-[var(--text-secondary)]">Token Storage:</span>

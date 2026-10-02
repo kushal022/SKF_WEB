@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
@@ -13,9 +13,15 @@ import {
   Download,
   Wifi,
   WifiOff,
-  UserCheck,
+  LogOut,
+  KeyRound,
+  User,
 } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
+import { useAppDispatch, useAppSelector } from '../app/store';
+import { useLogoutUserMutation, baseApi } from '../app/store/api';
+import { logout } from '../features/auth/authSlice';
+import { useToast } from '../components/ui';
 import { Drawer, Button, OfflineBanner, Badge } from '../components/ui';
 
 interface NavItem {
@@ -26,47 +32,74 @@ interface NavItem {
 }
 
 export function AdminLayout() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { showToast } = useToast();
+  const { user } = useAppSelector((state) => state.auth);
+
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const { canInstall, isOnline, promptInstall } = usePWAInstall();
 
+  const [logoutApi, { isLoading: isLoggingOut }] = useLogoutUserMutation();
+
   const navigation: NavItem[] = [
     {
       name: 'Foundation Overview',
-      path: '/',
+      path: '/admin',
       icon: <LayoutDashboard className="w-5 h-5" />,
     },
     {
+      name: 'Active Sessions',
+      path: '/admin/sessions',
+      icon: <KeyRound className="w-5 h-5" />,
+      badge: 'Active',
+    },
+    {
       name: 'Product Catalog',
-      path: '/products',
+      path: '/admin/products',
       icon: <Package className="w-5 h-5" />,
-      badge: 'Step 2',
+      badge: 'Next Step',
     },
     {
       name: 'Categories',
-      path: '/categories',
+      path: '/admin/categories',
       icon: <Layers className="w-5 h-5" />,
-      badge: 'Step 2',
+      badge: 'Next Step',
     },
     {
       name: 'Quotations & B2B',
-      path: '/quotations',
+      path: '/admin/quotations',
       icon: <FileText className="w-5 h-5" />,
-      badge: 'Step 3',
+      badge: 'Next Step',
     },
     {
       name: 'Theme & Settings',
-      path: '/theme-settings',
+      path: '/admin/theme-settings',
       icon: <Palette className="w-5 h-5" />,
-      badge: 'Step 4',
+      badge: 'Next Step',
     },
     {
       name: 'Security & Audit',
-      path: '/audit',
+      path: '/admin/audit',
       icon: <Shield className="w-5 h-5" />,
-      badge: 'Step 5',
+      badge: 'Next Step',
     },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi().unwrap();
+      showToast('info', 'Signed out successfully.', 'Session Closed');
+    } catch {
+      // Even if network request fails, clear local authentication state
+      showToast('info', 'Signed out locally.', 'Session Closed');
+    } finally {
+      dispatch(logout());
+      dispatch(baseApi.util.resetApiState());
+      navigate('/login', { replace: true });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--surface-background)] text-[var(--text-primary)]">
@@ -76,7 +109,7 @@ export function AdminLayout() {
       )}
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Desktop Sidebar (Desktop-first operational experience) */}
+        {/* Desktop Sidebar */}
         <aside
           className={`
             hidden md:flex flex-col bg-[var(--brand-primary)] text-white border-r border-slate-800 transition-all duration-200 z-30
@@ -112,12 +145,12 @@ export function AdminLayout() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === '/admin'}
                 className={({ isActive }) => `
                   flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                   ${
                     isActive
-                      ? 'bg-[var(--brand-accent)] text-white font-semibold'
+                      ? 'bg-[var(--brand-accent)] text-white font-semibold shadow-xs'
                       : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }
                   ${collapsed ? 'justify-center px-0' : ''}
@@ -156,15 +189,27 @@ export function AdminLayout() {
               <>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                  <span className="text-[11px]">{isOnline ? 'Operational' : 'Offline Mode'}</span>
+                  <span className="text-[11px]">{isOnline ? 'Online' : 'Offline'}</span>
                 </div>
-                <span className="text-[10px] text-slate-500">v1.0.0</span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="text-slate-400 hover:text-rose-400 flex items-center gap-1 text-[11px] transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
+                </button>
               </>
             ) : (
-              <div
-                className={`w-2.5 h-2.5 mx-auto rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                title={isOnline ? 'Online' : 'Offline'}
-              />
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="mx-auto p-1 text-slate-400 hover:text-rose-400 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             )}
           </div>
         </aside>
@@ -173,21 +218,36 @@ export function AdminLayout() {
         <Drawer
           isOpen={mobileDrawerOpen}
           onClose={() => setMobileDrawerOpen(false)}
-          title="Admin Menu"
+          title="Admin Navigation"
           position="left"
         >
           <div className="flex flex-col gap-2 py-2">
+            {/* User Profile in Mobile Drawer */}
+            <div className="p-3 rounded-lg bg-[var(--surface-muted)] mb-2 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center font-bold text-sm">
+                {user?.name ? user.name.charAt(0).toUpperCase() : <User className="w-5 h-5" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="font-semibold text-xs text-[var(--text-primary)] block truncate">
+                  {user?.name || 'Administrator'}
+                </span>
+                <span className="text-[11px] text-[var(--text-muted)] block truncate">
+                  {user?.email || 'admin@skffurniture.com'}
+                </span>
+              </div>
+            </div>
+
             {navigation.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === '/admin'}
                 onClick={() => setMobileDrawerOpen(false)}
                 className={({ isActive }) => `
                   flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                   ${
                     isActive
-                      ? 'bg-[var(--brand-accent)] text-white'
+                      ? 'bg-[var(--brand-accent)] text-white font-semibold'
                       : 'text-[var(--text-secondary)] hover:bg-[var(--surface-muted)]'
                   }
                 `}
@@ -204,19 +264,28 @@ export function AdminLayout() {
               </NavLink>
             ))}
 
-            {canInstall && (
-              <div className="mt-4 pt-4 border-t border-[var(--border-border)]">
+            <div className="mt-4 pt-4 border-t border-[var(--border-border)] space-y-2">
+              {canInstall && (
                 <Button
-                  variant="primary"
-                  size="md"
+                  variant="outline"
+                  size="sm"
                   onClick={promptInstall}
                   leftIcon={<Download className="w-4 h-4" />}
-                  className="w-full"
+                  className="w-full text-xs"
                 >
                   Install Admin PWA
                 </Button>
-              </div>
-            )}
+              )}
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleLogout}
+                leftIcon={<LogOut className="w-4 h-4" />}
+                className="w-full text-xs"
+              >
+                Sign Out
+              </Button>
+            </div>
           </div>
         </Drawer>
 
@@ -225,7 +294,6 @@ export function AdminLayout() {
           {/* Top Operational Bar */}
           <header className="h-16 bg-[var(--surface-surface)] border-b border-[var(--border-border)] px-4 sm:px-6 flex items-center justify-between gap-4 sticky top-0 z-20">
             <div className="flex items-center gap-3">
-              {/* Mobile Menu Button */}
               <button
                 type="button"
                 onClick={() => setMobileDrawerOpen(true)}
@@ -239,8 +307,8 @@ export function AdminLayout() {
                 <h1 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
                   SKF Operational Control
                 </h1>
-                <Badge variant="outline" size="sm" className="hidden sm:inline-flex">
-                  Foundation Active
+                <Badge variant="primary" size="sm" className="hidden sm:inline-flex capitalize">
+                  {user?.role || 'admin'}
                 </Badge>
               </div>
             </div>
@@ -273,19 +341,32 @@ export function AdminLayout() {
                 </Button>
               )}
 
-              {/* Staff / Admin Profile Status Indicator */}
-              <div className="flex items-center gap-2 pl-2 border-l border-[var(--border-border)]">
-                <div className="w-8 h-8 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center font-semibold text-xs">
-                  <UserCheck className="w-4 h-4" />
-                </div>
-                <div className="hidden lg:block text-left">
+              {/* Admin Profile Area */}
+              <div className="flex items-center gap-3 pl-3 border-l border-[var(--border-border)]">
+                <div className="text-right hidden sm:block">
                   <span className="text-xs font-semibold text-[var(--text-primary)] block leading-tight">
-                    Secured Console
+                    {user?.name || 'Administrator'}
                   </span>
-                  <span className="text-[10px] text-[var(--text-muted)] block">
-                    Zero-Token Cache Safe
+                  <span className="text-[10px] text-[var(--text-muted)] block truncate max-w-[150px]">
+                    {user?.email || 'admin@skffurniture.com'}
                   </span>
                 </div>
+                <div className="w-9 h-9 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+                </div>
+
+                {/* Logout Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  isLoading={isLoggingOut}
+                  leftIcon={<LogOut className="w-4 h-4 text-rose-500" />}
+                  className="text-xs text-[var(--status-error)] hover:bg-rose-50 hover:text-rose-600 hidden sm:inline-flex"
+                  aria-label="Logout from session"
+                >
+                  Logout
+                </Button>
               </div>
             </div>
           </header>

@@ -3,23 +3,30 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { tokenStorage } from '../../services/apiClient';
 
 export interface AdminUser {
-  id: number;
   public_id: string;
   name: string;
   email: string;
-  role: 'super_admin' | 'admin' | 'staff';
+  phone?: string | null;
+  role: 'admin' | string;
+  status: 'active' | string;
 }
 
-interface AuthState {
+export interface AuthState {
+  accessToken: string | null;
   user: AdminUser | null;
   isAuthenticated: boolean;
-  status: 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
+  isInitializing: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const initialState: AuthState = {
+  accessToken: null,
   user: null,
   isAuthenticated: false,
-  status: 'idle',
+  isInitializing: true, // Start in initializing state to allow startup session check
+  isLoading: false,
+  error: null,
 };
 
 export const authSlice = createSlice({
@@ -28,21 +35,55 @@ export const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ user: AdminUser; token: string }>
+      action: PayloadAction<{ user: AdminUser; accessToken: string }>
     ) => {
+      state.accessToken = action.payload.accessToken;
       state.user = action.payload.user;
       state.isAuthenticated = true;
-      state.status = 'authenticated';
-      tokenStorage.setToken(action.payload.token);
+      state.isInitializing = false;
+      state.isLoading = false;
+      state.error = null;
+      tokenStorage.setToken(action.payload.accessToken);
+    },
+    updateAccessToken: (state, action: PayloadAction<string>) => {
+      state.accessToken = action.payload;
+      tokenStorage.setToken(action.payload);
+    },
+    setUser: (state, action: PayloadAction<AdminUser>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      state.isInitializing = false;
+    },
+    setInitializing: (state, action: PayloadAction<boolean>) => {
+      state.isInitializing = action.payload;
+    },
+    setAuthLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    setAuthError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+      state.isLoading = false;
     },
     logout: (state) => {
+      state.accessToken = null;
       state.user = null;
       state.isAuthenticated = false;
-      state.status = 'unauthenticated';
+      state.isInitializing = false;
+      state.isLoading = false;
+      state.error = null;
       tokenStorage.clearToken();
     },
   },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const {
+  setCredentials,
+  updateAccessToken,
+  setUser,
+  setInitializing,
+  setAuthLoading,
+  setAuthError,
+  logout,
+} = authSlice.actions;
+
 export default authSlice.reducer;

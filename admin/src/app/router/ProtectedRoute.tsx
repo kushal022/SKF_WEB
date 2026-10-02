@@ -1,21 +1,30 @@
 import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../store';
+import { LoadingState } from '../../components/ui';
 
 export interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-/**
- * ProtectedRoute Architecture Foundation
- * Note: Full authentication lifecycle will be connected in Step 2.
- * Currently verifies store state access and protects route tree.
- */
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-  void isAuthenticated;
+  const location = useLocation();
+  const { isAuthenticated, isInitializing, user } = useAppSelector((state) => state.auth);
 
-  // In Step 1: Provide route boundary. When auth is enforced in Step 2,
-  // this will redirect to /login if !isAuthenticated.
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--surface-background)]">
+        <LoadingState message="Verifying administrative session..." />
+      </div>
+    );
+  }
+
+  // Not authenticated or role is not admin: redirect to login with safe returnTo parameter
+  if (!isAuthenticated || !user || user.role !== 'admin') {
+    const returnTo = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?returnTo=${returnTo}`} replace />;
+  }
+
   return <>{children}</>;
 }
 
