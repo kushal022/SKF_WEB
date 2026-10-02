@@ -1,18 +1,21 @@
 const crypto = require('crypto');
 const { Model } = require('../db');
 
-class Session extends Model {
+class ThemePreset extends Model {
   static get tableName() {
-    return 'sessions';
+    return 'theme_presets';
   }
 
   static get jsonAttributes() {
-    return [];
+    return ['theme_config'];
   }
 
   $beforeInsert() {
     if (!this.public_id) {
       this.public_id = crypto.randomUUID();
+    }
+    if (this.is_system === undefined || this.is_system === null) {
+      this.is_system = false;
     }
     const now = new Date();
     if (!this.created_at) {
@@ -30,17 +33,16 @@ class Session extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['user_id', 'refresh_token_hash', 'expires_at'],
+      required: ['name', 'theme_config'],
       properties: {
         id: { type: ['integer', 'string'] },
         public_id: { type: 'string', minLength: 36, maxLength: 36 },
-        user_id: { type: ['integer', 'string'] },
-        refresh_token_hash: { type: 'string', maxLength: 255 },
-        device_info: { type: ['string', 'null'], maxLength: 255 },
-        ip_address: { type: ['string', 'null'], maxLength: 45 },
-        user_agent: { type: ['string', 'null'] },
-        expires_at: { type: ['string', 'object'] },
-        revoked_at: { type: ['string', 'object', 'null'] },
+        name: { type: 'string', minLength: 1, maxLength: 150 },
+        description: { type: ['string', 'null'] },
+        theme_config: { type: ['object', 'string'] },
+        preview_image: { type: ['string', 'null'], maxLength: 500 },
+        is_system: { type: ['boolean', 'integer'], default: false },
+        created_by: { type: ['integer', 'string', 'null'] },
         created_at: { type: ['string', 'object'] },
         updated_at: { type: ['string', 'object'] },
       },
@@ -49,12 +51,13 @@ class Session extends Model {
 
   static get relationMappings() {
     const User = require('./User');
+
     return {
-      user: {
+      createdBy: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: 'sessions.user_id',
+          from: 'theme_presets.created_by',
           to: 'users.id',
         },
       },
@@ -62,4 +65,4 @@ class Session extends Model {
   }
 }
 
-module.exports = Session;
+module.exports = ThemePreset;

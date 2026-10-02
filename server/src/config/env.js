@@ -50,6 +50,19 @@ const env = {
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
+  bcrypt: {
+    saltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS, 10) || 12,
+  },
+  cookie: {
+    name: process.env.REFRESH_COOKIE_NAME || 'refreshToken',
+    secure: process.env.REFRESH_COOKIE_SECURE === 'true' || isProduction,
+    sameSite: process.env.REFRESH_COOKIE_SAME_SITE || 'lax',
+    domain: process.env.REFRESH_COOKIE_DOMAIN || undefined,
+  },
+  rateLimit: {
+    loginMax: parseInt(process.env.AUTH_LOGIN_RATE_LIMIT, 10) || 10,
+    registerMax: parseInt(process.env.AUTH_REGISTER_RATE_LIMIT, 10) || 5,
+  },
 };
 
 /**

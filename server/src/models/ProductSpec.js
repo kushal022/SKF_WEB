@@ -1,18 +1,17 @@
 const crypto = require('crypto');
 const { Model } = require('../db');
 
-class Session extends Model {
+class ProductSpec extends Model {
   static get tableName() {
-    return 'sessions';
-  }
-
-  static get jsonAttributes() {
-    return [];
+    return 'product_specs';
   }
 
   $beforeInsert() {
     if (!this.public_id) {
       this.public_id = crypto.randomUUID();
+    }
+    if (this.sort_order === undefined || this.sort_order === null) {
+      this.sort_order = 0;
     }
     const now = new Date();
     if (!this.created_at) {
@@ -30,17 +29,14 @@ class Session extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['user_id', 'refresh_token_hash', 'expires_at'],
+      required: ['product_id', 'spec_name', 'spec_value'],
       properties: {
         id: { type: ['integer', 'string'] },
         public_id: { type: 'string', minLength: 36, maxLength: 36 },
-        user_id: { type: ['integer', 'string'] },
-        refresh_token_hash: { type: 'string', maxLength: 255 },
-        device_info: { type: ['string', 'null'], maxLength: 255 },
-        ip_address: { type: ['string', 'null'], maxLength: 45 },
-        user_agent: { type: ['string', 'null'] },
-        expires_at: { type: ['string', 'object'] },
-        revoked_at: { type: ['string', 'object', 'null'] },
+        product_id: { type: ['integer', 'string'] },
+        spec_name: { type: 'string', minLength: 1, maxLength: 150 },
+        spec_value: { type: 'string', minLength: 1, maxLength: 500 },
+        sort_order: { type: 'integer', default: 0 },
         created_at: { type: ['string', 'object'] },
         updated_at: { type: ['string', 'object'] },
       },
@@ -48,18 +44,19 @@ class Session extends Model {
   }
 
   static get relationMappings() {
-    const User = require('./User');
+    const Product = require('./Product');
+
     return {
-      user: {
+      product: {
         relation: Model.BelongsToOneRelation,
-        modelClass: User,
+        modelClass: Product,
         join: {
-          from: 'sessions.user_id',
-          to: 'users.id',
+          from: 'product_specs.product_id',
+          to: 'products.id',
         },
       },
     };
   }
 }
 
-module.exports = Session;
+module.exports = ProductSpec;

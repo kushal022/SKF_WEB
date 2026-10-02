@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const config = require('./config');
+const cookieParser = require('cookie-parser');
 const requestLogger = require('./middleware/requestLogger');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
@@ -46,9 +47,10 @@ app.use(cors(corsOptions));
 // 3. Request Logging Middleware
 app.use(requestLogger);
 
-// 4. Body Parsing Middleware (10mb limit)
+// 4. Body Parsing & Cookie Middleware (10mb limit)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 // 5. Root Health Check (Convenience alias for load balancers)
 app.get('/health', (req, res) => {

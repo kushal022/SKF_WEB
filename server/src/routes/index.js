@@ -2,6 +2,7 @@ const express = require('express');
 const ApiResponse = require('../utils/apiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const { knex } = require('../db');
+const authRoutes = require('./auth.routes');
 
 const router = express.Router();
 
@@ -35,5 +36,8 @@ router.get(
     );
   })
 );
+
+// Mount Authentication & Session Routes (/api/v1/auth)
+router.use('/auth', authRoutes);
 
 module.exports = router;

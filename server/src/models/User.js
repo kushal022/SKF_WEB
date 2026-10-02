@@ -6,6 +6,10 @@ class User extends Model {
     return 'users';
   }
 
+  static get jsonAttributes() {
+    return [];
+  }
+
   $beforeInsert() {
     if (!this.public_id) {
       this.public_id = crypto.randomUUID();
@@ -46,6 +50,12 @@ class User extends Model {
 
   static get relationMappings() {
     const Session = require('./Session');
+    const ThemeSetting = require('./ThemeSetting');
+    const ThemePreset = require('./ThemePreset');
+    const EnquiryNote = require('./EnquiryNote');
+    const EnquiryStatusLog = require('./EnquiryStatusLog');
+    const EnquiryFollowUp = require('./EnquiryFollowUp');
+
     return {
       sessions: {
         relation: Model.HasManyRelation,
@@ -53,6 +63,86 @@ class User extends Model {
         join: {
           from: 'users.id',
           to: 'sessions.user_id',
+        },
+      },
+      themeSettings: {
+        relation: Model.HasManyRelation,
+        modelClass: ThemeSetting,
+        join: {
+          from: 'users.id',
+          to: 'theme_settings.created_by',
+        },
+      },
+      themePresets: {
+        relation: Model.HasManyRelation,
+        modelClass: ThemePreset,
+        join: {
+          from: 'users.id',
+          to: 'theme_presets.created_by',
+        },
+      },
+      enquiryNotes: {
+        relation: Model.HasManyRelation,
+        modelClass: EnquiryNote,
+        join: {
+          from: 'users.id',
+          to: 'enquiry_notes.user_id',
+        },
+      },
+      enquiryStatusLogs: {
+        relation: Model.HasManyRelation,
+        modelClass: EnquiryStatusLog,
+        join: {
+          from: 'users.id',
+          to: 'enquiry_status_logs.changed_by',
+        },
+      },
+      assignedFollowUps: {
+        relation: Model.HasManyRelation,
+        modelClass: EnquiryFollowUp,
+        join: {
+          from: 'users.id',
+          to: 'enquiry_follow_ups.assigned_to',
+        },
+      },
+      createdQuotations: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./Quotation'),
+        join: {
+          from: 'users.id',
+          to: 'quotations.created_by',
+        },
+      },
+      quotationStatusChanges: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./QuotationStatusLog'),
+        join: {
+          from: 'users.id',
+          to: 'quotation_status_logs.changed_by',
+        },
+      },
+      orderStatusChanges: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./OrderStatusLog'),
+        join: {
+          from: 'users.id',
+          to: 'order_status_logs.changed_by',
+        },
+      },
+      notifications: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./Notification'),
+        join: {
+          from: 'users.id',
+          to: 'notifications.user_id',
+        },
+      },
+      auditLogs: {
+        relation: Model.HasManyRelation,
+        modelClass: require('./AuditLog'),
+        join: {
+          from: 'users.id',
+          to: 'audit_logs.user_id',
         },
       },
     };
