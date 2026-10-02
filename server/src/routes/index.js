@@ -8,6 +8,12 @@ const settingsRoutes = require('./settings.routes');
 const themeRoutes = require('./theme.routes');
 const categoryRoutes = require('./category.routes');
 const productRoutes = require('./product.routes');
+const enquiryRoutes = require('./enquiry.routes');
+const customRequestRoutes = require('./customRequest.routes');
+const estimatorRoutes = require('./estimator.routes');
+const b2bRoutes = require('./b2b.routes');
+const galleryRoutes = require('./gallery.routes');
+const reviewRoutes = require('./review.routes');
 
 const router = express.Router();
 
@@ -47,6 +53,12 @@ router.use('/settings', settingsRoutes);
 router.use('/theme', themeRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/products', productRoutes);
+router.use('/enquiries', enquiryRoutes);
+router.use('/custom-requests', customRequestRoutes);
+router.use('/estimator', estimatorRoutes);
+router.use('/b2b', b2bRoutes);
+router.use('/galleries', galleryRoutes);
+router.use('/reviews', reviewRoutes);
 
 // Mount Authentication & Session Routes (/api/v1/auth)
 router.use('/auth', authRoutes);
