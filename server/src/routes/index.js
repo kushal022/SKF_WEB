@@ -4,6 +4,10 @@ const asyncHandler = require('../utils/asyncHandler');
 const { knex } = require('../db');
 const authRoutes = require('./auth.routes');
 const adminRoutes = require('./admin.routes');
+const settingsRoutes = require('./settings.routes');
+const themeRoutes = require('./theme.routes');
+const categoryRoutes = require('./category.routes');
+const productRoutes = require('./product.routes');
 
 const router = express.Router();
 
@@ -37,6 +41,12 @@ router.get(
     );
   })
 );
+
+// Mount Public Domain Routes
+router.use('/settings', settingsRoutes);
+router.use('/theme', themeRoutes);
+router.use('/categories', categoryRoutes);
+router.use('/products', productRoutes);
 
 // Mount Authentication & Session Routes (/api/v1/auth)
 router.use('/auth', authRoutes);
