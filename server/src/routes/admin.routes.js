@@ -15,6 +15,11 @@ const estimatorController = require('../controllers/estimator.controller');
 const b2bController = require('../controllers/b2b.controller');
 const galleryController = require('../controllers/gallery.controller');
 const reviewController = require('../controllers/review.controller');
+const quotationController = require('../controllers/quotation.controller');
+const orderController = require('../controllers/order.controller');
+const paymentController = require('../controllers/payment.controller');
+const notificationController = require('../controllers/notification.controller');
+const auditLogController = require('../controllers/auditLog.controller');
 
 // Validators
 const { updateSettingsSchema } = require('../validators/settings.validator');
@@ -94,6 +99,42 @@ const {
   setReviewFeaturedSchema,
   reviewParamSchema,
 } = require('../validators/review.validator');
+const {
+  createQuotationSchema,
+  updateQuotationSchema,
+  updateQuotationStatusSchema,
+  quotationParamSchema,
+  quotationAndItemParamSchema,
+  createQuotationItemSchema,
+  updateQuotationItemSchema,
+  listQuotationsQuerySchema,
+} = require('../validators/quotation.validator');
+const {
+  createOrderSchema,
+  updateOrderSchema,
+  updateOrderStatusSchema,
+  orderParamSchema,
+  orderAndItemParamSchema,
+  createOrderItemSchema,
+  updateOrderItemSchema,
+  listOrdersQuerySchema,
+} = require('../validators/order.validator');
+const {
+  createPaymentSchema,
+  updatePaymentSchema,
+  updatePaymentStatusSchema,
+  paymentParamSchema,
+  listPaymentsQuerySchema,
+} = require('../validators/payment.validator');
+const {
+  createNotificationSchema,
+  notificationParamSchema,
+  listNotificationsQuerySchema,
+} = require('../validators/notification.validator');
+const {
+  auditLogParamSchema,
+  listAuditLogsQuerySchema,
+} = require('../validators/auditLog.validator');
 
 const router = express.Router();
 
@@ -576,6 +617,180 @@ router.delete(
   '/reviews/:publicId',
   validate(reviewParamSchema, 'params'),
   reviewController.deleteAdminReview
+);
+
+// ==================== QUOTATIONS ====================
+router.get(
+  '/quotations',
+  validate(listQuotationsQuerySchema, 'query'),
+  quotationController.getAdminQuotations
+);
+router.get(
+  '/quotations/:publicId',
+  validate(quotationParamSchema, 'params'),
+  quotationController.getAdminQuotationByPublicId
+);
+router.post(
+  '/quotations',
+  validate(createQuotationSchema),
+  quotationController.createAdminQuotation
+);
+router.patch(
+  '/quotations/:publicId',
+  validate(quotationParamSchema, 'params'),
+  validate(updateQuotationSchema),
+  quotationController.updateAdminQuotation
+);
+router.post(
+  '/quotations/:publicId/status',
+  validate(quotationParamSchema, 'params'),
+  validate(updateQuotationStatusSchema),
+  quotationController.updateQuotationStatus
+);
+router.delete(
+  '/quotations/:publicId',
+  validate(quotationParamSchema, 'params'),
+  quotationController.deleteAdminQuotation
+);
+router.post(
+  '/quotations/:publicId/items',
+  validate(quotationParamSchema, 'params'),
+  validate(createQuotationItemSchema),
+  quotationController.addQuotationItem
+);
+router.patch(
+  '/quotations/:publicId/items/:itemPublicId',
+  validate(quotationAndItemParamSchema, 'params'),
+  validate(updateQuotationItemSchema),
+  quotationController.updateQuotationItem
+);
+router.delete(
+  '/quotations/:publicId/items/:itemPublicId',
+  validate(quotationAndItemParamSchema, 'params'),
+  quotationController.deleteQuotationItem
+);
+
+// ==================== ORDERS ====================
+router.get(
+  '/orders',
+  validate(listOrdersQuerySchema, 'query'),
+  orderController.getAdminOrders
+);
+router.get(
+  '/orders/:publicId',
+  validate(orderParamSchema, 'params'),
+  orderController.getAdminOrderByPublicId
+);
+router.post(
+  '/orders',
+  validate(createOrderSchema),
+  orderController.createAdminOrder
+);
+router.patch(
+  '/orders/:publicId',
+  validate(orderParamSchema, 'params'),
+  validate(updateOrderSchema),
+  orderController.updateAdminOrder
+);
+router.post(
+  '/orders/:publicId/status',
+  validate(orderParamSchema, 'params'),
+  validate(updateOrderStatusSchema),
+  orderController.updateOrderStatus
+);
+router.post(
+  '/orders/:publicId/items',
+  validate(orderParamSchema, 'params'),
+  validate(createOrderItemSchema),
+  orderController.addOrderItem
+);
+router.patch(
+  '/orders/:publicId/items/:itemPublicId',
+  validate(orderAndItemParamSchema, 'params'),
+  validate(updateOrderItemSchema),
+  orderController.updateOrderItem
+);
+router.delete(
+  '/orders/:publicId/items/:itemPublicId',
+  validate(orderAndItemParamSchema, 'params'),
+  orderController.deleteOrderItem
+);
+
+// ==================== PAYMENTS ====================
+router.get(
+  '/payments',
+  validate(listPaymentsQuerySchema, 'query'),
+  paymentController.getAdminPayments
+);
+router.get(
+  '/payments/:publicId',
+  validate(paymentParamSchema, 'params'),
+  paymentController.getAdminPaymentByPublicId
+);
+router.post(
+  '/payments',
+  validate(createPaymentSchema),
+  paymentController.createAdminPayment
+);
+router.post(
+  '/payments/:publicId/status',
+  validate(paymentParamSchema, 'params'),
+  validate(updatePaymentStatusSchema),
+  paymentController.updatePaymentStatus
+);
+router.patch(
+  '/payments/:publicId',
+  validate(paymentParamSchema, 'params'),
+  validate(updatePaymentSchema),
+  paymentController.updateAdminPayment
+);
+
+// ==================== NOTIFICATIONS ====================
+router.get(
+  '/notifications',
+  validate(listNotificationsQuerySchema, 'query'),
+  notificationController.getAdminNotifications
+);
+router.post(
+  '/notifications/read-all',
+  notificationController.markAllNotificationsAsRead
+);
+router.get(
+  '/notifications/:publicId',
+  validate(notificationParamSchema, 'params'),
+  notificationController.getAdminNotificationByPublicId
+);
+router.post(
+  '/notifications',
+  validate(createNotificationSchema),
+  notificationController.createAdminNotification
+);
+router.post(
+  '/notifications/:publicId/read',
+  validate(notificationParamSchema, 'params'),
+  notificationController.markNotificationAsRead
+);
+router.patch(
+  '/notifications/:publicId/read',
+  validate(notificationParamSchema, 'params'),
+  notificationController.markNotificationAsRead
+);
+router.delete(
+  '/notifications/:publicId',
+  validate(notificationParamSchema, 'params'),
+  notificationController.deleteAdminNotification
+);
+
+// ==================== AUDIT LOGS ====================
+router.get(
+  '/audit-logs',
+  validate(listAuditLogsQuerySchema, 'query'),
+  auditLogController.getAdminAuditLogs
+);
+router.get(
+  '/audit-logs/:publicId',
+  validate(auditLogParamSchema, 'params'),
+  auditLogController.getAdminAuditLogByPublicId
 );
 
 module.exports = router;
