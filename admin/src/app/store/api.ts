@@ -130,6 +130,19 @@ import type {
 
 export * from '../../types/analytics';
 
+import type {
+  ThemeListResponseData,
+  ThemeDetailResponseData,
+  ThemePresetListResponseData,
+  ThemePresetDetailResponseData,
+  CreateThemePayload,
+  UpdateThemePayload,
+  CreateThemePresetPayload,
+  UpdateThemePresetPayload,
+} from '../../types/theme';
+
+export * from '../../types/theme';
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
@@ -1328,6 +1341,96 @@ export const baseApi = createApi({
     }),
 
     // ==========================================
+    // Theme Settings & Presets (Step 13)
+    // ==========================================
+    getThemes: builder.query<ApiResponse<ThemeListResponseData>, void>({
+      query: () => '/admin/theme',
+      providesTags: ['Theme'],
+    }),
+
+    getThemeByPublicId: builder.query<ApiResponse<ThemeDetailResponseData>, string>({
+      query: (publicId) => `/admin/theme/${publicId}`,
+      providesTags: (_res, _err, publicId) => [{ type: 'Theme', id: publicId }],
+    }),
+
+    createTheme: builder.mutation<ApiResponse<ThemeDetailResponseData>, CreateThemePayload>({
+      query: (payload) => ({
+        url: '/admin/theme',
+        method: 'POST',
+        body: payload,
+      }),
+      invalidatesTags: ['Theme'],
+    }),
+
+    updateTheme: builder.mutation<
+      ApiResponse<ThemeDetailResponseData>,
+      { publicId: string; payload: UpdateThemePayload }
+    >({
+      query: ({ publicId, payload }) => ({
+        url: `/admin/theme/${publicId}`,
+        method: 'PATCH',
+        body: payload,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [{ type: 'Theme', id: publicId }, 'Theme'],
+    }),
+
+    publishTheme: builder.mutation<ApiResponse<ThemeDetailResponseData>, string>({
+      query: (publicId) => ({
+        url: `/admin/theme/${publicId}/publish`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Theme', 'Settings'],
+    }),
+
+    getThemePresets: builder.query<ApiResponse<ThemePresetListResponseData>, void>({
+      query: () => '/admin/theme-presets',
+      providesTags: ['Theme'],
+    }),
+
+    getThemePresetByPublicId: builder.query<ApiResponse<ThemePresetDetailResponseData>, string>({
+      query: (publicId) => `/admin/theme-presets/${publicId}`,
+      providesTags: (_res, _err, publicId) => [{ type: 'Theme', id: publicId }],
+    }),
+
+    createThemePreset: builder.mutation<ApiResponse<ThemePresetDetailResponseData>, CreateThemePresetPayload>({
+      query: (payload) => ({
+        url: '/admin/theme-presets',
+        method: 'POST',
+        body: payload,
+      }),
+      invalidatesTags: ['Theme'],
+    }),
+
+    updateThemePreset: builder.mutation<
+      ApiResponse<ThemePresetDetailResponseData>,
+      { publicId: string; payload: UpdateThemePresetPayload }
+    >({
+      query: ({ publicId, payload }) => ({
+        url: `/admin/theme-presets/${publicId}`,
+        method: 'PATCH',
+        body: payload,
+      }),
+      invalidatesTags: ['Theme'],
+    }),
+
+    applyThemePreset: builder.mutation<
+      ApiResponse<ThemeDetailResponseData>,
+      { presetPublicId: string; themePublicId?: string | null }
+    >({
+      query: ({ presetPublicId, themePublicId }) => ({
+        url: `/admin/theme-presets/${presetPublicId}/apply`,
+        method: 'POST',
+        body: { theme_public_id: themePublicId || null },
+      }),
+      invalidatesTags: ['Theme', 'Settings'],
+    }),
+
+    getPublicTheme: builder.query<ApiResponse<ThemeDetailResponseData>, void>({
+      query: () => '/theme/public',
+      providesTags: ['Theme'],
+    }),
+
+    // ==========================================
     // Analytics & Dashboard Summary (Step 12)
     // ==========================================
     getDashboardSummary: builder.query<ApiResponse<DashboardSummaryData>, void>({
@@ -1467,9 +1570,21 @@ export const {
   useUpdateReviewStatusMutation,
   useSetReviewFeaturedMutation,
   useDeleteReviewMutation,
-  // Business Settings
+  // Business & Website Settings
   useGetSettingsQuery,
   useUpdateSettingsMutation,
+  // Theme & Appearance (Step 13)
+  useGetThemesQuery,
+  useGetThemeByPublicIdQuery,
+  useCreateThemeMutation,
+  useUpdateThemeMutation,
+  usePublishThemeMutation,
+  useGetThemePresetsQuery,
+  useGetThemePresetByPublicIdQuery,
+  useCreateThemePresetMutation,
+  useUpdateThemePresetMutation,
+  useApplyThemePresetMutation,
+  useGetPublicThemeQuery,
   // Dashboard & Analytics
   useGetDashboardSummaryQuery,
   // Public Quotation Sharing

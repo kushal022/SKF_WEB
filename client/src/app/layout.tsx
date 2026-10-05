@@ -4,6 +4,7 @@ import { constructMetadata, generateOrganizationSchema } from '@/lib/seo';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import { ToastProvider } from '@/components/ui/Toast';
 import ClientShell from '@/layouts/ClientShell';
+import ActiveThemeProvider from '@/components/ActiveThemeProvider';
 
 export const metadata: Metadata = constructMetadata();
 
@@ -35,6 +36,7 @@ export default function RootLayout({
       </head>
       <body>
         <ToastProvider>
+          <ActiveThemeProvider />
           <ClientShell>
             {children}
           </ClientShell>
