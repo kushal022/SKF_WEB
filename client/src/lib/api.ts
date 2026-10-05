@@ -7,6 +7,13 @@ import type {
   WebsiteSettings,
   PaginatedResult,
   EnquiryPayload,
+  CustomRequestPayload,
+  CustomRequestResponse,
+  EstimatorRule,
+  EstimatorCalculatePayload,
+  EstimatorCalculationResult,
+  QuotationDetail,
+  ReviewPayload,
 } from '@/types';
 
 const API_BASE = config.apiBaseUrl;
@@ -227,3 +234,137 @@ export async function submitEnquiry(payload: EnquiryPayload): Promise<{ public_i
 
   return data;
 }
+
+/**
+ * Submit custom furniture request
+ */
+export async function submitCustomRequest(payload: CustomRequestPayload): Promise<CustomRequestResponse> {
+  const body: Record<string, unknown> = {
+    product_type: payload.product_type.trim(),
+    customer_name: payload.customer_name.trim(),
+    phone: payload.phone.trim(),
+    quantity: Math.max(1, payload.quantity || 1),
+  };
+
+  if (payload.width !== undefined && payload.width !== null && payload.width !== '') {
+    body.width = Number(payload.width) || payload.width;
+  }
+  if (payload.length !== undefined && payload.length !== null && payload.length !== '') {
+    body.length = Number(payload.length) || payload.length;
+  }
+  if (payload.height !== undefined && payload.height !== null && payload.height !== '') {
+    body.height = Number(payload.height) || payload.height;
+  }
+  if (payload.dimension_unit?.trim()) body.dimension_unit = payload.dimension_unit.trim();
+  if (payload.material?.trim()) body.material = payload.material.trim();
+  if (payload.finish?.trim()) body.finish = payload.finish.trim();
+  if (payload.email?.trim()) body.email = payload.email.trim();
+  if (payload.city?.trim()) body.city = payload.city.trim();
+  if (payload.requirement?.trim()) body.requirement = payload.requirement.trim();
+  if (payload.estimated_amount !== undefined && payload.estimated_amount !== null && payload.estimated_amount !== '') {
+    body.estimated_amount = Number(payload.estimated_amount) || payload.estimated_amount;
+  }
+  if (Array.isArray(payload.images) && payload.images.length > 0) {
+    body.images = payload.images.map((img, i) => ({
+      image_url: img.image_url.trim(),
+      cloudinary_public_id: img.cloudinary_public_id?.trim() || null,
+      sort_order: img.sort_order ?? i,
+    }));
+  }
+
+  const data = await fetchApi<CustomRequestResponse>('/custom-requests', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+  return data;
+}
+
+/**
+ * Fetch active public estimator rules
+ */
+export async function getEstimatorRules(): Promise<EstimatorRule[]> {
+  try {
+    const data = await fetchApi<EstimatorRule[]>('/estimator/rules');
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('[API] getEstimatorRules error:', err);
+    return [];
+  }
+}
+
+/**
+ * Calculate automated furniture price estimate
+ */
+export async function calculateEstimator(payload: EstimatorCalculatePayload): Promise<EstimatorCalculationResult> {
+  const body: Record<string, unknown> = {
+    width: Number(payload.width),
+    length: Number(payload.length),
+    height: payload.height !== undefined ? Number(payload.height) : 0,
+    dimension_unit: payload.dimension_unit || 'mm',
+    quantity: Math.max(1, payload.quantity || 1),
+  };
+
+  if (payload.product_type?.trim()) body.product_type = payload.product_type.trim();
+  if (payload.material?.trim()) body.material = payload.material.trim();
+  if (payload.finish?.trim()) body.finish = payload.finish.trim();
+
+  const data = await fetchApi<EstimatorCalculationResult>('/estimator/calculate', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+  return data;
+}
+
+/**
+ * Fetch public quotation by secure public UUID
+ */
+export async function getPublicQuotation(publicId: string): Promise<QuotationDetail> {
+  const data = await fetchApi<{ quotation: QuotationDetail }>(`/quotations/${publicId}`);
+  return data.quotation;
+}
+
+/**
+ * Accept public quotation
+ */
+export async function acceptPublicQuotation(publicId: string): Promise<QuotationDetail> {
+  const data = await fetchApi<{ quotation: QuotationDetail }>(`/quotations/${publicId}/accept`, {
+    method: 'POST',
+  });
+  return data.quotation;
+}
+
+/**
+ * Reject public quotation with optional reason
+ */
+export async function rejectPublicQuotation(publicId: string, reason?: string): Promise<QuotationDetail> {
+  const data = await fetchApi<{ quotation: QuotationDetail }>(`/quotations/${publicId}/reject`, {
+    method: 'POST',
+    body: JSON.stringify(reason?.trim() ? { reason: reason.trim() } : {}),
+  });
+  return data.quotation;
+}
+
+/**
+ * Submit public customer review (starts in pending state)
+ */
+export async function submitPublicReview(payload: ReviewPayload): Promise<{ public_id: string; customer_name: string }> {
+  const body: Record<string, unknown> = {
+    customer_name: payload.customer_name.trim(),
+    rating: Math.max(1, Math.min(5, Math.round(payload.rating))),
+    review_text: payload.review_text.trim(),
+  };
+
+  if (payload.product_public_id?.trim()) {
+    body.product_public_id = payload.product_public_id.trim();
+  }
+
+  const data = await fetchApi<{ public_id: string; customer_name: string }>('/reviews', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+  return data;
+}
+

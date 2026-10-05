@@ -1,15 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
   Maximize2,
   X,
   ChevronRight,
+  ChevronLeft,
   MessageSquare,
   Layers,
   Award,
+  Sparkles,
+  Calculator,
+  ArrowRight,
+  Camera,
 } from 'lucide-react';
 import { Button, Badge, Skeleton } from '@/components/ui';
 import EnquiryModal from '@/components/EnquiryModal';
@@ -26,18 +31,79 @@ const GALLERY_CATEGORIES = [
   'Custom Projects',
 ];
 
+const INITIAL_GALLERIES: GalleryItem[] = [
+  {
+    public_id: 'init-gal-1',
+    title: 'Verona Sculptural Dining Suite Installation',
+    slug: 'verona-dining-installation',
+    category: 'Dining',
+    description: 'Custom Grade 304 titanium gold dining table with integrated floor mountings and 12mm beveled crystal top.',
+    status: 'published',
+    images: [
+      {
+        public_id: 'img-1',
+        image_url: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=1200&q=80',
+        alt_text: 'Verona Sculptural Dining Suite Installation',
+        sort_order: 1,
+      },
+      {
+        public_id: 'img-2',
+        image_url: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?auto=format&fit=crop&w=1200&q=80',
+        alt_text: 'Stainless Steel Detail',
+        sort_order: 2,
+      },
+    ],
+  },
+  {
+    public_id: 'init-gal-2',
+    title: 'Aura Minimalist Living Suite & Console',
+    slug: 'aura-living-suite',
+    category: 'Living',
+    description: 'Brushed hairline finish with seamless corner joints in luxury penthouse residence.',
+    status: 'published',
+    images: [
+      {
+        public_id: 'img-3',
+        image_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=80',
+        alt_text: 'Aura Minimalist Living Suite & Console',
+        sort_order: 1,
+      },
+    ],
+  },
+  {
+    public_id: 'init-gal-3',
+    title: 'Executive Boardroom Table & Display Partition',
+    slug: 'executive-boardroom-suite',
+    category: 'Commercial',
+    description: '14-seater mirror-polished Grade 316 stainless steel boardroom centerpiece with hidden wire management.',
+    status: 'published',
+    images: [
+      {
+        public_id: 'img-4',
+        image_url: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1200&q=80',
+        alt_text: 'Executive Boardroom Table & Display Partition',
+        sort_order: 1,
+      },
+    ],
+  },
+];
+
+interface LightboxItem {
+  url: string;
+  title: string;
+  description?: string | null;
+  category?: string | null;
+}
+
 export default function GalleryPage() {
-  const [galleries, setGalleries] = useState<GalleryItem[]>([]);
+  const [galleries, setGalleries] = useState<GalleryItem[]>(INITIAL_GALLERIES);
   const [settings, setSettings] = useState<WebsiteSettings | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // Lightbox State
-  const [lightboxImage, setLightboxImage] = useState<{
-    url: string;
-    title: string;
-    description?: string | null;
-  } | null>(null);
+  // Multi-image Lightbox State
+  const [lightboxItems, setLightboxItems] = useState<LightboxItem[]>([]);
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
 
   // Quote modal
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
@@ -58,7 +124,11 @@ export default function GalleryPage() {
         ]);
 
         if (!isMounted) return;
-        setGalleries(galRes.items);
+        if (galRes?.items?.length > 0) {
+          setGalleries(galRes.items);
+        } else if (activeCategory !== 'All') {
+          setGalleries([]);
+        }
         setSettings(settingsRes);
       } catch (err) {
         console.error('[GalleryPage] Load error:', err);
@@ -79,6 +149,63 @@ export default function GalleryPage() {
     setQuoteModalOpen(true);
   };
 
+  const openLightbox = (item: GalleryItem, initialIndex = 0) => {
+    const images: LightboxItem[] = (item.images && item.images.length > 0)
+      ? item.images.map((img) => ({
+          url: img.image_url,
+          title: item.title,
+          description: item.description,
+          category: item.category,
+        }))
+      : [
+          {
+            url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+            title: item.title,
+            description: item.description,
+            category: item.category,
+          },
+        ];
+
+    setLightboxItems(images);
+    setCurrentIndex(initialIndex);
+  };
+
+  const closeLightbox = () => {
+    setCurrentIndex(-1);
+    setLightboxItems([]);
+  };
+
+  const showNext = useCallback(() => {
+    if (currentIndex >= 0 && currentIndex < lightboxItems.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+    } else if (lightboxItems.length > 1) {
+      setCurrentIndex(0); // loop
+    }
+  }, [currentIndex, lightboxItems.length]);
+
+  const showPrev = useCallback(() => {
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+    } else if (lightboxItems.length > 1) {
+      setCurrentIndex(lightboxItems.length - 1); // loop
+    }
+  }, [currentIndex, lightboxItems.length]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (currentIndex === -1) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') showNext();
+      if (e.key === 'ArrowLeft') showPrev();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, showNext, showPrev]);
+
+  const currentItem = currentIndex >= 0 ? lightboxItems[currentIndex] : null;
+
   return (
     <div className="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumb Header */}
@@ -96,14 +223,26 @@ export default function GalleryPage() {
               <span>Fabrication Portfolio</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
-              Executed Installations & Architectural Projects
+              Executed Installations &amp; Architectural Projects
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1.5 max-w-2xl leading-relaxed">
-              Explore bespoke stainless steel furniture, partition jalis, dining sets, and commercial prep suites delivered to our clients.
+              Explore bespoke stainless steel furniture, partition jalis, dining sets, and commercial prep suites delivered to our clients across India.
             </p>
           </div>
-          <div className="text-xs text-[var(--text-muted)] shrink-0 font-medium">
-            Showing <span className="font-bold text-[var(--text-primary)]">{galleries.length}</span> installations
+          <div className="flex items-center gap-3">
+            <Link href="/custom-furniture">
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Sparkles className="w-3.5 h-3.5 text-[var(--brand-accent)]" />}
+                className="text-xs"
+              >
+                Custom Order
+              </Button>
+            </Link>
+            <div className="text-xs text-[var(--text-muted)] shrink-0 font-medium hidden sm:block">
+              Showing <span className="font-bold text-[var(--text-primary)]">{galleries.length}</span> installations
+            </div>
           </div>
         </div>
       </div>
@@ -152,9 +291,10 @@ export default function GalleryPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {galleries.map((item) => {
             const firstImg = item.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80';
+            const imgCount = item.images?.length || 1;
             const whatsappUrl = buildWhatsAppUrl({
               phone: settings?.whatsapp_number,
-              message: `Hello SKF Furniture, I saw your project "${item.title}" in the gallery and would like to enquire about similar fabrication.`,
+              message: `Hello SKF Furniture, I saw your project "${item.title}" in the gallery and would like to enquire about similar custom fabrication.`,
             });
 
             return (
@@ -165,7 +305,7 @@ export default function GalleryPage() {
                 {/* Image Container with Lightbox Trigger */}
                 <div
                   className="relative aspect-[4/3] overflow-hidden bg-slate-100 cursor-pointer"
-                  onClick={() => setLightboxImage({ url: firstImg, title: item.title, description: item.description })}
+                  onClick={() => openLightbox(item, 0)}
                 >
                   <Image
                     src={firstImg}
@@ -180,6 +320,13 @@ export default function GalleryPage() {
                     <Badge variant="primary" size="sm" className="absolute top-3 left-3">
                       {item.category}
                     </Badge>
+                  )}
+
+                  {imgCount > 1 && (
+                    <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-semibold flex items-center gap-1 backdrop-blur-xs">
+                      <Camera className="w-3 h-3" />
+                      <span>{imgCount} Photos</span>
+                    </div>
                   )}
 
                   <button
@@ -204,7 +351,7 @@ export default function GalleryPage() {
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-[var(--border-border)] flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-[var(--border-border)] flex flex-wrap items-center justify-between gap-2">
                     <a
                       href={whatsappUrl}
                       target="_blank"
@@ -212,17 +359,26 @@ export default function GalleryPage() {
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold border border-emerald-200 transition-colors"
                     >
                       <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Ask via WhatsApp</span>
+                      <span>WhatsApp</span>
                     </a>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openQuoteForProject(item.title)}
-                      className="text-xs"
-                    >
-                      Enquire Similar
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        href={`/custom-furniture?type=${encodeURIComponent(item.title)}`}
+                        className="text-[11px] font-semibold text-[var(--brand-accent)] hover:underline"
+                      >
+                        Custom Size
+                      </Link>
+                      <span className="text-[var(--border-border)]">•</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openQuoteForProject(item.title)}
+                        className="text-xs"
+                      >
+                        Enquire
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -231,40 +387,135 @@ export default function GalleryPage() {
         </div>
       )}
 
-      {/* Lightbox Modal */}
-      {lightboxImage && (
+      {/* Prominent Conversion Banner */}
+      <section className="p-8 sm:p-12 rounded-3xl bg-[var(--brand-primary)] text-white shadow-xl space-y-6">
+        <div className="max-w-2xl space-y-2">
+          <Badge variant="warning" size="sm">
+            Architectural Custom Fabrication
+          </Badge>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            Have a Bespoke Vision for Your Home or Commercial Project?
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Every piece in our gallery was manufactured from custom CAD drawings. We fabricate custom dining tables, console frames, partition screens, and kitchen prep suites in Grade 304 &amp; 316.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <Link href="/custom-furniture">
+            <Button
+              variant="primary"
+              size="md"
+              leftIcon={<Sparkles className="w-4 h-4 text-slate-950" />}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold"
+            >
+              Custom Furniture Studio
+            </Button>
+          </Link>
+
+          <Link href="/estimator">
+            <Button
+              variant="outline"
+              size="md"
+              leftIcon={<Calculator className="w-4 h-4" />}
+              className="border-white/30 text-white hover:bg-white/10"
+            >
+              Instant Cost Estimator
+            </Button>
+          </Link>
+
+          <Link href="/products">
+            <Button
+              variant="ghost"
+              size="md"
+              rightIcon={<ArrowRight className="w-4 h-4" />}
+              className="text-slate-300 hover:text-white"
+            >
+              Browse Catalog
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Enhanced Lightbox Modal */}
+      {currentItem && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4"
-          onClick={() => setLightboxImage(null)}
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 select-none"
+          onClick={closeLightbox}
         >
-          <button
-            type="button"
-            onClick={() => setLightboxImage(null)}
-            className="absolute top-4 right-4 p-2.5 text-white/80 hover:text-white bg-white/10 rounded-full focus:outline-none"
-            aria-label="Close lightbox"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          {/* Top Controls */}
+          <div className="absolute top-4 left-4 right-4 flex items-center justify-between text-white z-10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold bg-white/10 px-2.5 py-1 rounded">
+                {currentIndex + 1} / {lightboxItems.length}
+              </span>
+              {currentItem.category && (
+                <span className="text-xs text-amber-400 font-semibold">
+                  {currentItem.category}
+                </span>
+              )}
+            </div>
 
+            <button
+              type="button"
+              onClick={closeLightbox}
+              className="p-2.5 text-white/80 hover:text-white bg-white/10 rounded-full focus:outline-none transition-colors"
+              aria-label="Close lightbox"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Navigation Arrows */}
+          {lightboxItems.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  showPrev();
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full focus:outline-none transition-colors z-10"
+                aria-label="Previous photo"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  showNext();
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full focus:outline-none transition-colors z-10"
+                aria-label="Next photo"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+
+          {/* Main Photo View */}
           <div
             className="relative max-w-5xl max-h-[75vh] w-full h-[70vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={lightboxImage.url}
-              alt={lightboxImage.title}
+              src={currentItem.url}
+              alt={currentItem.title}
               fill
               className="object-contain"
               sizes="90vw"
             />
           </div>
 
-          <div className="text-center text-white mt-4 max-w-lg space-y-1" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-base">{lightboxImage.title}</h3>
-            {lightboxImage.description && (
-              <p className="text-xs text-slate-300">{lightboxImage.description}</p>
+          {/* Caption & Project Context */}
+          <div className="text-center text-white mt-4 max-w-lg space-y-1.5" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-base">{currentItem.title}</h3>
+            {currentItem.description && (
+              <p className="text-xs text-slate-300 leading-relaxed">{currentItem.description}</p>
             )}
           </div>
         </div>

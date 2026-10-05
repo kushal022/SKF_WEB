@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Modal, Button, Input } from '@/components/ui';
 import { CheckCircle2, MessageSquare, Send } from 'lucide-react';
 import { submitEnquiry } from '@/lib/api';
@@ -61,6 +62,14 @@ export function EnquiryModal({
       return;
     }
 
+    if (email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        setErrorMessage('Please enter a valid email address, or leave it blank.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
 
@@ -107,15 +116,22 @@ export function EnquiryModal({
             <CheckCircle2 className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h4 className="text-lg font-bold text-[var(--text-primary)]">Enquiry Submitted!</h4>
+            <h4 className="text-lg font-bold text-[var(--text-primary)]">Enquiry Received!</h4>
             <p className="text-sm text-[var(--text-secondary)] max-w-sm mx-auto">
-              Thank you! Your quotation request has been submitted successfully. Our engineering and sales team will contact you shortly.
+              Thanks! Your enquiry has been received. Our team will contact you shortly.
             </p>
           </div>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button variant="outline" size="sm" onClick={handleClose}>
               Close
             </Button>
+            <Link
+              href="/products"
+              onClick={handleClose}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-border)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] text-xs font-semibold transition-colors"
+            >
+              Explore Products
+            </Link>
             <a
               href={whatsappUrl}
               target="_blank"

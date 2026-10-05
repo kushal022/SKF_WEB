@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button, Badge } from '@/components/ui';
 import EnquiryModal from '@/components/EnquiryModal';
+import ReviewModal from '@/components/ReviewModal';
 import {
   getPublicSettings,
   getPublicCategories,
@@ -74,6 +75,7 @@ export default function HomePage() {
 
   // Quote modal state
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<{
     name: string;
     code: string;
@@ -588,50 +590,106 @@ export default function HomePage() {
       </section>
 
       {/* 7. VERIFIED REVIEWS SECTION */}
-      {reviews.length > 0 && (
-        <section className="bg-[var(--surface-muted)] py-16 px-4 sm:px-6 lg:px-8 border-y border-[var(--border-border)]">
-          <div className="max-w-7xl mx-auto space-y-10">
-            <div className="text-center max-w-xl mx-auto space-y-2">
+      <section className="bg-[var(--surface-muted)] py-16 px-4 sm:px-6 lg:px-8 border-y border-[var(--border-border)]">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="max-w-xl space-y-2">
               <Badge variant="success" size="sm">Client Testimonials</Badge>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
-                Trusted by Homeowners & Architects
+                Trusted by Homeowners &amp; Architects
               </h2>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
                 Authentic feedback from clients who commissioned bespoke stainless steel furniture from SKF.
               </p>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setReviewModalOpen(true)}
+              leftIcon={<Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+              className="self-start sm:self-auto text-xs"
+            >
+              Write a Review
+            </Button>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {reviews.map((rev) => (
-                <div
-                  key={rev.public_id}
-                  className="p-6 rounded-xl bg-[var(--surface-surface)] border border-[var(--border-border)] shadow-xs flex flex-col justify-between space-y-4"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-1 text-amber-400">
-                      {[...Array(rev.rating || 5)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed italic">
-                      &ldquo;{rev.review_text}&rdquo;
-                    </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {reviews.map((rev) => (
+              <div
+                key={rev.public_id}
+                className="p-6 rounded-xl bg-[var(--surface-surface)] border border-[var(--border-border)] shadow-xs flex flex-col justify-between space-y-4"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center gap-1 text-amber-400">
+                    {[...Array(rev.rating || 5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    ))}
                   </div>
-                  <div className="pt-2 border-t border-[var(--border-border)]">
-                    <span className="text-xs font-bold text-[var(--text-primary)] block">
-                      {rev.customer_name}
-                    </span>
-                    <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      Verified Commission
-                    </span>
-                  </div>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed italic">
+                    &ldquo;{rev.review_text}&rdquo;
+                  </p>
                 </div>
-              ))}
+                <div className="pt-2 border-t border-[var(--border-border)]">
+                  <span className="text-xs font-bold text-[var(--text-primary)] block">
+                    {rev.customer_name}
+                  </span>
+                  <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Verified Commission
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* "Want furniture like this?" Conversion Card */}
+          <div className="p-6 sm:p-8 rounded-2xl bg-[var(--surface-surface)] border-2 border-[var(--brand-accent)]/30 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-1.5 max-w-xl">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--brand-accent)]">
+                Want furniture like this?
+              </span>
+              <h3 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
+                Commission Your Own Bespoke Stainless Steel Furniture
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                Whether you need a custom-dimensioned dining suite, a luxury bedframe in PVD Titanium Gold, or commercial prep tables, our engineers will bring your design to life.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <Link href="/custom-furniture">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  leftIcon={<Sparkles className="w-3.5 h-3.5" />}
+                  className="text-xs font-semibold"
+                >
+                  Custom Request
+                </Button>
+              </Link>
+              <Link href="/estimator">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  leftIcon={<Wrench className="w-3.5 h-3.5" />}
+                  className="text-xs font-semibold"
+                >
+                  Estimate Price
+                </Button>
+              </Link>
+              <a
+                href={generalWhatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-xs"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>WhatsApp</span>
+              </a>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* 8. FINAL CONVERSION CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -691,6 +749,12 @@ export default function HomePage() {
         productPublicId={selectedProduct?.publicId}
         source="home_page"
         settings={settings}
+      />
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
       />
     </div>
   );

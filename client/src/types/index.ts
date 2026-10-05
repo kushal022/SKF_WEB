@@ -173,3 +173,123 @@ export interface EnquiryPayload {
   source?: string | null;
   message?: string | null;
 }
+
+export interface CustomRequestImage {
+  image_url: string;
+  cloudinary_public_id?: string | null;
+  sort_order?: number;
+}
+
+export interface CustomRequestPayload {
+  product_type: string;
+  width?: number | string | null;
+  length?: number | string | null;
+  height?: number | string | null;
+  dimension_unit?: string | null;
+  material?: string | null;
+  finish?: string | null;
+  quantity?: number;
+  customer_name: string;
+  phone: string;
+  email?: string | null;
+  city?: string | null;
+  requirement?: string | null;
+  estimated_amount?: number | string | null;
+  images?: CustomRequestImage[];
+}
+
+export interface CustomRequestResponse {
+  public_id: string;
+  product_type: string;
+  customer_name: string;
+  phone: string;
+  status: string;
+  created_at: string;
+}
+
+export interface EstimatorRule {
+  public_id: string;
+  name: string;
+  product_type: string | null;
+  material: string | null;
+  finish: string | null;
+  dimension_multiplier: number | null;
+  material_rate: number | null;
+  finish_adjustment: number | null;
+  base_rate: number | null;
+  priority: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EstimatorCalculatePayload {
+  product_type?: string | null;
+  width: number;
+  length: number;
+  height?: number;
+  dimension_unit: 'mm' | 'cm' | 'in' | 'ft' | 'm';
+  material?: string | null;
+  finish?: string | null;
+  quantity?: number;
+}
+
+export interface EstimatorCalculationResult {
+  is_estimate: boolean;
+  disclaimer: string;
+  matched_rule: {
+    public_id: string;
+    name: string;
+  } | null;
+  unit_estimate: number;
+  total_estimate: number;
+  quantity: number;
+  currency: string;
+}
+
+export interface QuotationItemProduct {
+  name: string;
+  slug: string;
+  product_code?: string;
+}
+
+export interface QuotationItem {
+  public_id: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  customization_amount: number;
+  discount_amount: number;
+  line_total: number;
+  product?: QuotationItemProduct | null;
+  metadata?: unknown;
+}
+
+export interface QuotationDetail {
+  public_id: string;
+  quotation_number: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string | null;
+  subtotal: number;
+  customization_amount: number;
+  transport_amount: number;
+  installation_amount: number;
+  discount_amount: number;
+  tax_amount: number;
+  total_amount: number;
+  valid_until?: string | null;
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'cancelled';
+  notes?: string | null;
+  items: QuotationItem[];
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface ReviewPayload {
+  customer_name: string;
+  rating: number;
+  review_text: string;
+  product_public_id?: string | null;
+}
+

@@ -59,6 +59,8 @@ export function ClientShell({ children }: ClientShellProps) {
   const navLinks = [
     { label: 'Home', href: '/' },
     { label: 'Products', href: '/products' },
+    { label: 'Custom', href: '/custom-furniture' },
+    { label: 'Estimator', href: '/estimator' },
     { label: 'Gallery', href: '/gallery' },
     { label: 'About', href: '/about' },
     { label: 'FAQ', href: '/faq' },
@@ -333,6 +335,8 @@ export function ClientShell({ children }: ClientShellProps) {
               <ul className="space-y-2 text-xs text-slate-400">
                 <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
                 <li><Link href="/products" className="hover:text-white transition-colors">Product Catalog</Link></li>
+                <li><Link href="/custom-furniture" className="hover:text-white transition-colors">Custom Furniture</Link></li>
+                <li><Link href="/estimator" className="hover:text-white transition-colors">Price Estimator</Link></li>
                 <li><Link href="/gallery" className="hover:text-white transition-colors">Completed Projects</Link></li>
                 <li><Link href="/about" className="hover:text-white transition-colors">Our Manufacturing</Link></li>
                 <li><Link href="/faq" className="hover:text-white transition-colors">Client FAQs</Link></li>

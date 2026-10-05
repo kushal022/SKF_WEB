@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Button, Input } from '@/components/ui';
 import { CheckCircle2, MessageSquare, Send } from 'lucide-react';
 import { submitEnquiry } from '@/lib/api';
@@ -43,6 +44,14 @@ export function EnquiryForm({
       return;
     }
 
+    if (email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        setErrorMessage('Please enter a valid email address, or leave it blank.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
 
@@ -82,13 +91,19 @@ export function EnquiryForm({
         <div className="space-y-1">
           <h3 className="text-xl font-bold text-[var(--text-primary)]">Enquiry Received!</h3>
           <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed">
-            Thank you! Your quotation request has been submitted successfully. Our engineering and sales team will contact you shortly.
+            Thanks! Your enquiry has been received. Our team will contact you shortly.
           </p>
         </div>
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button variant="outline" size="sm" onClick={() => setIsSuccess(false)}>
             Submit Another Inquiry
           </Button>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-[var(--border-border)] hover:bg-[var(--surface-muted)] text-[var(--text-primary)] text-xs font-semibold transition-colors"
+          >
+            Explore Products
+          </Link>
           <a
             href={whatsappUrl}
             target="_blank"
