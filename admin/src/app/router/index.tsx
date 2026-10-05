@@ -19,6 +19,9 @@ import CustomRequestDetailPage from '../../features/customRequests/pages/CustomR
 import GalleryListPage from '../../features/gallery/pages/GalleryListPage';
 import GalleryDetailPage from '../../features/gallery/pages/GalleryDetailPage';
 import ReviewListPage from '../../features/reviews/pages/ReviewListPage';
+import PublicQuotationPage from '../../features/quotations/pages/PublicQuotationPage';
+import BusinessSettingsPage from '../../features/settings/pages/BusinessSettingsPage';
+import AnalyticsPage from '../../features/analytics/pages/AnalyticsPage';
 import { EmptyState } from '../../components/ui';
 
 function StepPlaceholder({ stepTitle, description }: { stepTitle: string; description: string }) {
@@ -81,12 +84,17 @@ export function AppRouter() {
         <Route path="/quotations" element={<Navigate to="/admin/quotations" replace />} />
         <Route path="/quotations/new" element={<Navigate to="/admin/quotations/new" replace />} />
         <Route path="/quotations/:id" element={<QuotationDetailRedirect />} />
+        {/* Customer Public Quotation Sharing Route */}
+        <Route path="/quotation/:id" element={<PublicQuotationPage />} />
         <Route path="/estimator" element={<Navigate to="/admin/estimator" replace />} />
         <Route path="/custom-requests" element={<Navigate to="/admin/custom-requests" replace />} />
         <Route path="/custom-requests/:id" element={<CustomRequestDetailRedirect />} />
         <Route path="/gallery" element={<Navigate to="/admin/gallery" replace />} />
         <Route path="/gallery/:id" element={<GalleryDetailRedirect />} />
         <Route path="/reviews" element={<Navigate to="/admin/reviews" replace />} />
+        <Route path="/settings" element={<Navigate to="/admin/settings/business" replace />} />
+        <Route path="/settings/business" element={<Navigate to="/admin/settings/business" replace />} />
+        <Route path="/analytics" element={<Navigate to="/admin/analytics" replace />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -131,15 +139,14 @@ export function AppRouter() {
 
           {/* Customer Reviews & Moderation */}
           <Route path="reviews" element={<ReviewListPage />} />
-          <Route
-            path="theme-settings"
-            element={
-              <StepPlaceholder
-                stepTitle="Theme & Site Settings Ready"
-                description="Theme presets and live dynamic theme customizer will be implemented in future modules."
-              />
-            }
-          />
+
+          {/* Business & Website Settings (Step 11) */}
+          <Route path="settings" element={<Navigate to="/admin/settings/business" replace />} />
+          <Route path="settings/business" element={<BusinessSettingsPage />} />
+          <Route path="theme-settings" element={<BusinessSettingsPage />} />
+
+          {/* Basic Analytics & KPI Telemetry (Step 12) */}
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route
             path="audit"
             element={

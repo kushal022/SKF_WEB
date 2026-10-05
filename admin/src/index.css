@@ -108,3 +108,50 @@ body {
   background-color: var(--brand-accent);
   color: var(--text-inverse);
 }
+
+/* Print Styles for Quotation PDF Generation */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10.5pt;
+  }
+
+  /* Hide admin portal shell and action toolbars during print */
+  nav, header, aside, .print\:hidden {
+    display: none !important;
+  }
+
+  /* Ensure printable paper expands to full A4 page width */
+  .print\:p-0 {
+    padding: 0 !important;
+  }
+
+  .print\:m-0 {
+    margin: 0 !important;
+  }
+
+  .print\:border-none {
+    border: none !important;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\:w-full {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Prevent awkward page breaks inside line items, totals, and signatures */
+  tr, .print-avoid-break, table {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}

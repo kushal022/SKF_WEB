@@ -827,15 +827,118 @@ const deleteQuotationItem = async (publicId, itemPublicId, req) => {
   return getQuotationByPublicId(publicId);
 };
 
+/**
+ * Sanitizes quotation for public customer-facing view (hiding internal admin notes, CRM links, and user IDs).
+ */
+const sanitizePublicQuotation = (quotation) => {
+  if (!quotation) return null;
+  return {
+    public_id: quotation.public_id,
+    quotation_number: quotation.quotation_number,
+    customer_name: quotation.customer_name,
+    customer_phone: quotation.customer_phone,
+    customer_email: quotation.customer_email || null,
+    subtotal: Number(quotation.subtotal),
+    customization_amount: Number(quotation.customization_amount),
+    transport_amount: Number(quotation.transport_amount),
+    installation_amount: Number(quotation.installation_amount),
+    discount_amount: Number(quotation.discount_amount),
+    tax_amount: Number(quotation.tax_amount),
+    total_amount: Number(quotation.total_amount),
+    valid_until: quotation.valid_until || null,
+    status: quotation.status,
+    notes: quotation.notes || null,
+    items: Array.isArray(quotation.items) ? quotation.items.map(sanitizeQuotationItem) : [],
+    created_at: quotation.created_at,
+    updated_at: quotation.updated_at,
+  };
+};
+
+/**
+ * Retrieves public-safe quotation for customer sharing.
+ */
+const getPublicQuotationByPublicId = async (publicId) => {
+  const quotation = await Quotation.query()
+    .where('public_id', publicId)
+    .withGraphFetched('items.[product]')
+    .first();
+
+  if (!quotation) {
+    throw ApiError.notFound('Quotation not found');
+  }
+
+  if (quotation.status === 'draft') {
+    throw ApiError.forbidden('This quotation is currently in draft and not yet available for public review');
+  }
+
+  return sanitizePublicQuotation(quotation);
+};
+
+/**
+ * Allows a customer to accept a sent quotation.
+ */
+const acceptPublicQuotation = async (publicId, req) => {
+  const quotation = await Quotation.query().where('public_id', publicId).first();
+  if (!quotation) {
+    throw ApiError.notFound('Quotation not found');
+  }
+
+  if (quotation.status === 'accepted') {
+    return sanitizePublicQuotation(quotation);
+  }
+
+  if (quotation.status !== 'sent') {
+    throw ApiError.badRequest(`Cannot accept quotation with status '${quotation.status}'. Only sent quotations can be accepted.`);
+  }
+
+  if (quotation.valid_until) {
+    const validDate = new Date(quotation.valid_until);
+    validDate.setHours(23, 59, 59, 999);
+    if (new Date() > validDate) {
+      await updateQuotationStatus(publicId, { status: 'expired', comment: 'Quotation expired past validity date' }, req);
+      throw ApiError.badRequest('This quotation has expired and can no longer be accepted. Please contact sales to renew.');
+    }
+  }
+
+  const updated = await updateQuotationStatus(publicId, { status: 'accepted', comment: 'Accepted by customer via public link' }, req);
+  return sanitizePublicQuotation(updated);
+};
+
+/**
+ * Allows a customer to reject a sent quotation with an optional reason.
+ */
+const rejectPublicQuotation = async (publicId, { reason } = {}, req) => {
+  const quotation = await Quotation.query().where('public_id', publicId).first();
+  if (!quotation) {
+    throw ApiError.notFound('Quotation not found');
+  }
+
+  if (quotation.status === 'rejected') {
+    return sanitizePublicQuotation(quotation);
+  }
+
+  if (quotation.status !== 'sent') {
+    throw ApiError.badRequest(`Cannot reject quotation with status '${quotation.status}'. Only sent quotations can be rejected.`);
+  }
+
+  const comment = reason?.trim() ? `Customer rejection reason: ${reason.trim()}` : 'Rejected by customer via public link';
+  const updated = await updateQuotationStatus(publicId, { status: 'rejected', comment }, req);
+  return sanitizePublicQuotation(updated);
+};
+
 module.exports = {
   roundCurrency,
   calculateItemAmounts,
   calculateQuotationTotals,
   generateQuotationNumber,
   sanitizeQuotation,
+  sanitizePublicQuotation,
   sanitizeQuotationItem,
   listQuotations,
   getQuotationByPublicId,
+  getPublicQuotationByPublicId,
+  acceptPublicQuotation,
+  rejectPublicQuotation,
   createQuotation,
   updateQuotation,
   updateQuotationStatus,

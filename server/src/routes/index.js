@@ -14,6 +14,7 @@ const estimatorRoutes = require('./estimator.routes');
 const b2bRoutes = require('./b2b.routes');
 const galleryRoutes = require('./gallery.routes');
 const reviewRoutes = require('./review.routes');
+const quotationRoutes = require('./quotation.routes');
 
 const router = express.Router();
 
@@ -59,6 +60,7 @@ router.use('/estimator', estimatorRoutes);
 router.use('/b2b', b2bRoutes);
 router.use('/galleries', galleryRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/quotations', quotationRoutes);
 
 // Mount Authentication & Session Routes (/api/v1/auth)
 router.use('/auth', authRoutes);

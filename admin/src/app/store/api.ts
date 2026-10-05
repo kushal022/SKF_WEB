@@ -117,6 +117,19 @@ import type {
 
 export * from '../../types/review';
 
+import type {
+  UpdateWebsiteSettingsPayload,
+  SettingsResponseData,
+} from '../../types/settings';
+
+export * from '../../types/settings';
+
+import type {
+  DashboardSummaryData,
+} from '../../types/analytics';
+
+export * from '../../types/analytics';
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
@@ -1296,6 +1309,62 @@ export const baseApi = createApi({
         { type: 'Reviews', id: 'LIST' },
       ],
     }),
+
+    // ==========================================
+    // Website & Business Settings (Step 11)
+    // ==========================================
+    getSettings: builder.query<ApiResponse<SettingsResponseData>, void>({
+      query: () => '/admin/settings',
+      providesTags: ['Settings'],
+    }),
+
+    updateSettings: builder.mutation<ApiResponse<SettingsResponseData>, UpdateWebsiteSettingsPayload>({
+      query: (payload) => ({
+        url: '/admin/settings',
+        method: 'PATCH',
+        body: payload,
+      }),
+      invalidatesTags: ['Settings'],
+    }),
+
+    // ==========================================
+    // Analytics & Dashboard Summary (Step 12)
+    // ==========================================
+    getDashboardSummary: builder.query<ApiResponse<DashboardSummaryData>, void>({
+      query: () => '/admin/dashboard/summary',
+      providesTags: ['Products', 'Enquiries', 'CustomRequests', 'Quotations', 'Reviews'],
+    }),
+
+    // ==========================================
+    // Public Quotation Sharing & Approval (Step 10)
+    // ==========================================
+    getPublicQuotation: builder.query<ApiResponse<{ quotation: QuotationDetail }>, string>({
+      query: (publicId) => `/quotations/${publicId}`,
+      providesTags: (_res, _err, publicId) => [{ type: 'Quotations', id: publicId }],
+    }),
+
+    acceptPublicQuotation: builder.mutation<ApiResponse<{ quotation: QuotationDetail }>, string>({
+      query: (publicId) => ({
+        url: `/quotations/${publicId}/accept`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, publicId) => [
+        { type: 'Quotations', id: publicId },
+        { type: 'Quotations', id: 'LIST' },
+      ],
+    }),
+
+    rejectPublicQuotation: builder.mutation<ApiResponse<{ quotation: QuotationDetail }>, { publicId: string; reason?: string }>({
+      query: ({ publicId, reason }) => ({
+        url: `/quotations/${publicId}/reject`,
+        method: 'POST',
+        body: { reason },
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Quotations', id: publicId },
+        { type: 'Quotations', id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -1398,6 +1467,15 @@ export const {
   useUpdateReviewStatusMutation,
   useSetReviewFeaturedMutation,
   useDeleteReviewMutation,
+  // Business Settings
+  useGetSettingsQuery,
+  useUpdateSettingsMutation,
+  // Dashboard & Analytics
+  useGetDashboardSummaryQuery,
+  // Public Quotation Sharing
+  useGetPublicQuotationQuery,
+  useAcceptPublicQuotationMutation,
+  useRejectPublicQuotationMutation,
 } = baseApi;
 
 export default baseApi;

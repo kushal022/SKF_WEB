@@ -10,7 +10,8 @@ import {
   Sparkles,
   Images,
   Star,
-  Palette,
+  Building2,
+  BarChart3,
   Shield,
   Menu,
   ChevronLeft,
@@ -53,6 +54,12 @@ export function AdminLayout() {
       name: 'Foundation Overview',
       path: '/admin',
       icon: <LayoutDashboard className="w-5 h-5" />,
+    },
+    {
+      name: 'Executive Analytics',
+      path: '/admin/analytics',
+      icon: <BarChart3 className="w-5 h-5" />,
+      badge: 'Step 12',
     },
     {
       name: 'Active Sessions',
@@ -101,10 +108,9 @@ export function AdminLayout() {
       icon: <Star className="w-5 h-5" />,
     },
     {
-      name: 'Theme & Settings',
-      path: '/admin/theme-settings',
-      icon: <Palette className="w-5 h-5" />,
-      badge: 'Next Step',
+      name: 'Business Settings',
+      path: '/admin/settings/business',
+      icon: <Building2 className="w-5 h-5" />,
     },
     {
       name: 'Security & Audit',
