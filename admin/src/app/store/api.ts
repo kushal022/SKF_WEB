@@ -14,6 +14,29 @@ import {
   type AdminUser,
 } from '../../features/auth/authSlice';
 import { tokenStorage } from '../../services/apiClient';
+import type {
+  CategoryItem,
+  CategoryQueryParams,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+  ProductListItem,
+  ProductDetail,
+  ProductQueryParams,
+  CreateProductRequest,
+  UpdateProductRequest,
+  ProductImageItem,
+  CreateImageRequest,
+  UpdateImageRequest,
+  ProductVideoItem,
+  CreateVideoRequest,
+  UpdateVideoRequest,
+  ProductSpecItem,
+  CreateSpecRequest,
+  UpdateSpecRequest,
+  PaginatedResult,
+} from '../../types/catalog';
+
+export * from '../../types/catalog';
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -229,6 +252,328 @@ export const baseApi = createApi({
       }),
       invalidatesTags: ['Sessions'],
     }),
+
+    // ==================== CATEGORIES ====================
+    getCategories: builder.query<
+      ApiResponse<PaginatedResult<CategoryItem>>,
+      CategoryQueryParams | void
+    >({
+      query: (params) => ({
+        url: '/admin/categories',
+        params: params || {},
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map(({ public_id }) => ({
+                type: 'Categories' as const,
+                id: public_id,
+              })),
+              { type: 'Categories', id: 'LIST' },
+            ]
+          : [{ type: 'Categories', id: 'LIST' }],
+    }),
+
+    getCategoryByPublicId: builder.query<ApiResponse<{ category: CategoryItem }>, string>({
+      query: (publicId) => `/admin/categories/${publicId}`,
+      providesTags: (_res, _err, id) => [{ type: 'Categories', id }],
+    }),
+
+    createCategory: builder.mutation<ApiResponse<{ category: CategoryItem }>, CreateCategoryRequest>({
+      query: (body) => ({
+        url: '/admin/categories',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Categories', id: 'LIST' }],
+    }),
+
+    updateCategory: builder.mutation<
+      ApiResponse<{ category: CategoryItem }>,
+      { publicId: string; data: UpdateCategoryRequest }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/categories/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Categories', id: publicId },
+        { type: 'Categories', id: 'LIST' },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    deleteCategory: builder.mutation<ApiResponse<Record<string, never>>, string>({
+      query: (publicId) => ({
+        url: `/admin/categories/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Categories', id: 'LIST' }],
+    }),
+
+    // ==================== PRODUCTS ====================
+    getProducts: builder.query<
+      ApiResponse<PaginatedResult<ProductListItem>>,
+      ProductQueryParams | void
+    >({
+      query: (params) => ({
+        url: '/admin/products',
+        params: params || {},
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map(({ public_id }) => ({
+                type: 'Products' as const,
+                id: public_id,
+              })),
+              { type: 'Products', id: 'LIST' },
+            ]
+          : [{ type: 'Products', id: 'LIST' }],
+    }),
+
+    getProductByPublicId: builder.query<ApiResponse<{ product: ProductDetail }>, string>({
+      query: (publicId) => `/admin/products/${publicId}`,
+      providesTags: (_res, _err, id) => [{ type: 'Products', id }],
+    }),
+
+    createProduct: builder.mutation<ApiResponse<{ product: ProductDetail }>, CreateProductRequest>({
+      query: (body) => ({
+        url: '/admin/products',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Products', id: 'LIST' }],
+    }),
+
+    updateProduct: builder.mutation<
+      ApiResponse<{ product: ProductDetail }>,
+      { publicId: string; data: UpdateProductRequest }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/products/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Products', id: publicId },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    deleteProduct: builder.mutation<ApiResponse<Record<string, never>>, string>({
+      query: (publicId) => ({
+        url: `/admin/products/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Products', id: 'LIST' }],
+    }),
+
+    publishProduct: builder.mutation<ApiResponse<{ product: ProductDetail }>, string>({
+      query: (publicId) => ({
+        url: `/admin/products/${publicId}/publish`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, id) => [
+        { type: 'Products', id },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    archiveProduct: builder.mutation<ApiResponse<{ product: ProductDetail }>, string>({
+      query: (publicId) => ({
+        url: `/admin/products/${publicId}/archive`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, id) => [
+        { type: 'Products', id },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    // ==================== PRODUCT MEDIA (IMAGES) ====================
+    getProductImages: builder.query<ApiResponse<{ images: ProductImageItem[] }>, string>({
+      query: (publicId) => `/admin/products/${publicId}/images`,
+      providesTags: (_res, _err, id) => [{ type: 'Products', id: `IMAGES_${id}` }],
+    }),
+
+    addProductImage: builder.mutation<
+      ApiResponse<{ image: ProductImageItem }>,
+      { productPublicId: string; data: CreateImageRequest }
+    >({
+      query: ({ productPublicId, data }) => ({
+        url: `/admin/products/${productPublicId}/images`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `IMAGES_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    updateProductImage: builder.mutation<
+      ApiResponse<{ image: ProductImageItem }>,
+      { productPublicId: string; imagePublicId: string; data: UpdateImageRequest }
+    >({
+      query: ({ productPublicId, imagePublicId, data }) => ({
+        url: `/admin/products/${productPublicId}/images/${imagePublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `IMAGES_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    deleteProductImage: builder.mutation<
+      ApiResponse<Record<string, never>>,
+      { productPublicId: string; imagePublicId: string }
+    >({
+      query: ({ productPublicId, imagePublicId }) => ({
+        url: `/admin/products/${productPublicId}/images/${imagePublicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `IMAGES_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    setPrimaryProductImage: builder.mutation<
+      ApiResponse<{ image: ProductImageItem }>,
+      { productPublicId: string; imagePublicId: string }
+    >({
+      query: ({ productPublicId, imagePublicId }) => ({
+        url: `/admin/products/${productPublicId}/images/${imagePublicId}/primary`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `IMAGES_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+        { type: 'Products', id: 'LIST' },
+      ],
+    }),
+
+    reorderProductImages: builder.mutation<
+      ApiResponse<{ images: ProductImageItem[] }>,
+      { productPublicId: string; items: { public_id: string; sort_order: number }[] }
+    >({
+      query: ({ productPublicId, items }) => ({
+        url: `/admin/products/${productPublicId}/images/reorder`,
+        method: 'PATCH',
+        body: { items },
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `IMAGES_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+      ],
+    }),
+
+    // ==================== PRODUCT MEDIA (VIDEOS) ====================
+    getProductVideos: builder.query<ApiResponse<{ videos: ProductVideoItem[] }>, string>({
+      query: (publicId) => `/admin/products/${publicId}/videos`,
+      providesTags: (_res, _err, id) => [{ type: 'Products', id: `VIDEOS_${id}` }],
+    }),
+
+    addProductVideo: builder.mutation<
+      ApiResponse<{ video: ProductVideoItem }>,
+      { productPublicId: string; data: CreateVideoRequest }
+    >({
+      query: ({ productPublicId, data }) => ({
+        url: `/admin/products/${productPublicId}/videos`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `VIDEOS_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+      ],
+    }),
+
+    updateProductVideo: builder.mutation<
+      ApiResponse<{ video: ProductVideoItem }>,
+      { productPublicId: string; videoPublicId: string; data: UpdateVideoRequest }
+    >({
+      query: ({ productPublicId, videoPublicId, data }) => ({
+        url: `/admin/products/${productPublicId}/videos/${videoPublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `VIDEOS_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+      ],
+    }),
+
+    deleteProductVideo: builder.mutation<
+      ApiResponse<Record<string, never>>,
+      { productPublicId: string; videoPublicId: string }
+    >({
+      query: ({ productPublicId, videoPublicId }) => ({
+        url: `/admin/products/${productPublicId}/videos/${videoPublicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `VIDEOS_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+      ],
+    }),
+
+    // ==================== PRODUCT SPECIFICATIONS ====================
+    getProductSpecs: builder.query<ApiResponse<{ specs: ProductSpecItem[] }>, string>({
+      query: (publicId) => `/admin/products/${publicId}/specs`,
+      providesTags: (_res, _err, id) => [{ type: 'Products', id: `SPECS_${id}` }],
+    }),
+
+    addProductSpec: builder.mutation<
+      ApiResponse<{ spec: ProductSpecItem }>,
+      { productPublicId: string; data: CreateSpecRequest }
+    >({
+      query: ({ productPublicId, data }) => ({
+        url: `/admin/products/${productPublicId}/specs`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `SPECS_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+      ],
+    }),
+
+    updateProductSpec: builder.mutation<
+      ApiResponse<{ spec: ProductSpecItem }>,
+      { productPublicId: string; specPublicId: string; data: UpdateSpecRequest }
+    >({
+      query: ({ productPublicId, specPublicId, data }) => ({
+        url: `/admin/products/${productPublicId}/specs/${specPublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `SPECS_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+      ],
+    }),
+
+    deleteProductSpec: builder.mutation<
+      ApiResponse<Record<string, never>>,
+      { productPublicId: string; specPublicId: string }
+    >({
+      query: ({ productPublicId, specPublicId }) => ({
+        url: `/admin/products/${productPublicId}/specs/${specPublicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, { productPublicId }) => [
+        { type: 'Products', id: `SPECS_${productPublicId}` },
+        { type: 'Products', id: productPublicId },
+      ],
+    }),
   }),
 });
 
@@ -242,6 +587,37 @@ export const {
   useLazyGetMeQuery,
   useGetSessionsQuery,
   useRevokeSessionMutation,
+  // Categories
+  useGetCategoriesQuery,
+  useGetCategoryByPublicIdQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+  // Products
+  useGetProductsQuery,
+  useGetProductByPublicIdQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  usePublishProductMutation,
+  useArchiveProductMutation,
+  // Media (Images)
+  useGetProductImagesQuery,
+  useAddProductImageMutation,
+  useUpdateProductImageMutation,
+  useDeleteProductImageMutation,
+  useSetPrimaryProductImageMutation,
+  useReorderProductImagesMutation,
+  // Media (Videos)
+  useGetProductVideosQuery,
+  useAddProductVideoMutation,
+  useUpdateProductVideoMutation,
+  useDeleteProductVideoMutation,
+  // Specifications
+  useGetProductSpecsQuery,
+  useAddProductSpecMutation,
+  useUpdateProductSpecMutation,
+  useDeleteProductSpecMutation,
 } = baseApi;
 
 export default baseApi;

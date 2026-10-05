@@ -1,9 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import ProtectedRoute from './ProtectedRoute';
 import LoginPage from '../../features/auth/LoginPage';
 import SessionsPage from '../../features/sessions/SessionsPage';
 import FoundationDashboard from '../../features/foundation/FoundationDashboard';
+import CategoryListPage from '../../features/categories/pages/CategoryListPage';
+import ProductListPage from '../../features/products/pages/ProductListPage';
+import ProductCreatePage from '../../features/products/pages/ProductCreatePage';
+import ProductDetailPage from '../../features/products/pages/ProductDetailPage';
 import { EmptyState } from '../../components/ui';
 
 function StepPlaceholder({ stepTitle, description }: { stepTitle: string; description: string }) {
@@ -21,6 +25,11 @@ function StepPlaceholder({ stepTitle, description }: { stepTitle: string; descri
   );
 }
 
+function ProductDetailRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/admin/products/${id}`} replace />;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -30,6 +39,12 @@ export function AppRouter() {
 
         {/* Root Redirect to /admin */}
         <Route path="/" element={<Navigate to="/admin" replace />} />
+
+        {/* Top-Level Route Aliases (from report-defined Admin routes) */}
+        <Route path="/categories" element={<Navigate to="/admin/categories" replace />} />
+        <Route path="/products" element={<Navigate to="/admin/products" replace />} />
+        <Route path="/products/new" element={<Navigate to="/admin/products/new" replace />} />
+        <Route path="/products/:id" element={<ProductDetailRedirect />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -44,25 +59,13 @@ export function AppRouter() {
           <Route path="dashboard" element={<FoundationDashboard />} />
           <Route path="sessions" element={<SessionsPage />} />
 
-          {/* Planned Business Modules (Step Placeholders) */}
-          <Route
-            path="products"
-            element={
-              <StepPlaceholder
-                stepTitle="Product Catalog Foundation Ready"
-                description="Products CRUD, variant management, and specifications will be implemented in future modules."
-              />
-            }
-          />
-          <Route
-            path="categories"
-            element={
-              <StepPlaceholder
-                stepTitle="Category Architecture Ready"
-                description="Hierarchical category management will be implemented in future modules."
-              />
-            }
-          />
+          {/* Categories Management */}
+          <Route path="categories" element={<CategoryListPage />} />
+
+          {/* Product Catalog Management */}
+          <Route path="products" element={<ProductListPage />} />
+          <Route path="products/new" element={<ProductCreatePage />} />
+          <Route path="products/:id" element={<ProductDetailPage />} />
           <Route
             path="quotations"
             element={

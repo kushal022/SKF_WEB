@@ -59,13 +59,11 @@ export function AdminLayout() {
       name: 'Product Catalog',
       path: '/admin/products',
       icon: <Package className="w-5 h-5" />,
-      badge: 'Next Step',
     },
     {
       name: 'Categories',
       path: '/admin/categories',
       icon: <Layers className="w-5 h-5" />,
-      badge: 'Next Step',
     },
     {
       name: 'Quotations & B2B',

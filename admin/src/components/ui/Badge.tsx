@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'outline';
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'outline' | 'default';
   size?: 'sm' | 'md';
 }
 
@@ -18,6 +18,7 @@ export function Badge({
   };
 
   const variantStyles = {
+    default: 'bg-[var(--surface-muted)] text-[var(--text-secondary)]',
     primary: 'bg-[var(--brand-primary)] text-[var(--text-inverse)]',
     secondary: 'bg-[var(--surface-muted)] text-[var(--text-primary)]',
     success: 'bg-[var(--status-success)]/15 text-[var(--status-success)] font-semibold',
