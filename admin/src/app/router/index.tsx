@@ -8,6 +8,12 @@ import CategoryListPage from '../../features/categories/pages/CategoryListPage';
 import ProductListPage from '../../features/products/pages/ProductListPage';
 import ProductCreatePage from '../../features/products/pages/ProductCreatePage';
 import ProductDetailPage from '../../features/products/pages/ProductDetailPage';
+import EnquiryListPage from '../../features/enquiries/pages/EnquiryListPage';
+import EnquiryDetailPage from '../../features/enquiries/pages/EnquiryDetailPage';
+import QuotationListPage from '../../features/quotations/pages/QuotationListPage';
+import QuotationCreatePage from '../../features/quotations/pages/QuotationCreatePage';
+import QuotationDetailPage from '../../features/quotations/pages/QuotationDetailPage';
+import EstimatorPage from '../../features/estimator/pages/EstimatorPage';
 import { EmptyState } from '../../components/ui';
 
 function StepPlaceholder({ stepTitle, description }: { stepTitle: string; description: string }) {
@@ -30,6 +36,16 @@ function ProductDetailRedirect() {
   return <Navigate to={`/admin/products/${id}`} replace />;
 }
 
+function EnquiryDetailRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/admin/enquiries/${id}`} replace />;
+}
+
+function QuotationDetailRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/admin/quotations/${id}`} replace />;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -45,6 +61,12 @@ export function AppRouter() {
         <Route path="/products" element={<Navigate to="/admin/products" replace />} />
         <Route path="/products/new" element={<Navigate to="/admin/products/new" replace />} />
         <Route path="/products/:id" element={<ProductDetailRedirect />} />
+        <Route path="/enquiries" element={<Navigate to="/admin/enquiries" replace />} />
+        <Route path="/enquiries/:id" element={<EnquiryDetailRedirect />} />
+        <Route path="/quotations" element={<Navigate to="/admin/quotations" replace />} />
+        <Route path="/quotations/new" element={<Navigate to="/admin/quotations/new" replace />} />
+        <Route path="/quotations/:id" element={<QuotationDetailRedirect />} />
+        <Route path="/estimator" element={<Navigate to="/admin/estimator" replace />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -66,15 +88,18 @@ export function AppRouter() {
           <Route path="products" element={<ProductListPage />} />
           <Route path="products/new" element={<ProductCreatePage />} />
           <Route path="products/:id" element={<ProductDetailPage />} />
-          <Route
-            path="quotations"
-            element={
-              <StepPlaceholder
-                stepTitle="Quotations & B2B Pipeline Ready"
-                description="Quotations, Estimator and B2B pricing pipelines will be implemented in future modules."
-              />
-            }
-          />
+
+          {/* Enquiries & CRM Pipeline Management */}
+          <Route path="enquiries" element={<EnquiryListPage />} />
+          <Route path="enquiries/:id" element={<EnquiryDetailPage />} />
+
+          {/* Quotations & Commercial Proposals */}
+          <Route path="quotations" element={<QuotationListPage />} />
+          <Route path="quotations/new" element={<QuotationCreatePage />} />
+          <Route path="quotations/:id" element={<QuotationDetailPage />} />
+
+          {/* Pricing Estimator Management */}
+          <Route path="estimator" element={<EstimatorPage />} />
           <Route
             path="theme-settings"
             element={

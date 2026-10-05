@@ -38,6 +38,48 @@ import type {
 
 export * from '../../types/catalog';
 
+import type {
+  EnquiryListItem,
+  EnquiryDetail,
+  EnquiryNote,
+  EnquiryFollowUp,
+  EnquiryQueryParams,
+  UpdateEnquiryRequest,
+  UpdateEnquiryStatusRequest,
+  CreateEnquiryNoteRequest,
+  UpdateEnquiryNoteRequest,
+  CreateFollowUpRequest,
+  UpdateFollowUpRequest,
+  PaginatedEnquiriesResult,
+} from '../../types/enquiry';
+
+export * from '../../types/enquiry';
+
+import type {
+  QuotationDetail,
+  QuotationQueryParams,
+  CreateQuotationPayload,
+  UpdateQuotationPayload,
+  UpdateQuotationStatusPayload,
+  CreateQuotationItemPayload,
+  UpdateQuotationItemPayload,
+  PaginatedQuotationsResult,
+} from '../../types/quotation';
+
+export * from '../../types/quotation';
+
+import type {
+  EstimatorRule,
+  CreateEstimatorRulePayload,
+  UpdateEstimatorRulePayload,
+  EstimatorQueryParams,
+  PaginatedEstimatorRulesResult,
+  CalculateEstimateRequest,
+  CalculateEstimateResult,
+} from '../../types/estimator';
+
+export * from '../../types/estimator';
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
@@ -183,6 +225,7 @@ export const baseApi = createApi({
     'Products',
     'Orders',
     'Quotations',
+    'Estimator',
     'Enquiries',
     'CustomRequests',
     'B2B',
@@ -574,6 +617,331 @@ export const baseApi = createApi({
         { type: 'Products', id: productPublicId },
       ],
     }),
+
+    // ==================== ENQUIRIES ====================
+    getEnquiries: builder.query<
+      ApiResponse<PaginatedEnquiriesResult>,
+      EnquiryQueryParams | void
+    >({
+      query: (params) => ({
+        url: '/admin/enquiries',
+        params: params || {},
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map(({ public_id }) => ({
+                type: 'Enquiries' as const,
+                id: public_id,
+              })),
+              { type: 'Enquiries', id: 'LIST' },
+            ]
+          : [{ type: 'Enquiries', id: 'LIST' }],
+    }),
+
+    getEnquiryByPublicId: builder.query<ApiResponse<EnquiryDetail>, string>({
+      query: (publicId) => `/admin/enquiries/${publicId}`,
+      providesTags: (_res, _err, id) => [{ type: 'Enquiries', id }],
+    }),
+
+    updateAdminEnquiry: builder.mutation<
+      ApiResponse<EnquiryDetail>,
+      { publicId: string; data: UpdateEnquiryRequest }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/enquiries/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: publicId },
+        { type: 'Enquiries', id: 'LIST' },
+      ],
+    }),
+
+    updateEnquiryStatus: builder.mutation<
+      ApiResponse<EnquiryListItem>,
+      { publicId: string; data: UpdateEnquiryStatusRequest }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/enquiries/${publicId}/status`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: publicId },
+        { type: 'Enquiries', id: 'LIST' },
+      ],
+    }),
+
+    // Enquiry Notes
+    getEnquiryNotes: builder.query<ApiResponse<EnquiryNote[]>, string>({
+      query: (publicId) => `/admin/enquiries/${publicId}/notes`,
+      providesTags: (_res, _err, id) => [{ type: 'Enquiries', id: `NOTES_${id}` }],
+    }),
+
+    createEnquiryNote: builder.mutation<
+      ApiResponse<EnquiryNote>,
+      { publicId: string; data: CreateEnquiryNoteRequest }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/enquiries/${publicId}/notes`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: `NOTES_${publicId}` },
+        { type: 'Enquiries', id: publicId },
+      ],
+    }),
+
+    updateEnquiryNote: builder.mutation<
+      ApiResponse<EnquiryNote>,
+      { publicId: string; notePublicId: string; data: UpdateEnquiryNoteRequest }
+    >({
+      query: ({ publicId, notePublicId, data }) => ({
+        url: `/admin/enquiries/${publicId}/notes/${notePublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: `NOTES_${publicId}` },
+        { type: 'Enquiries', id: publicId },
+      ],
+    }),
+
+    deleteEnquiryNote: builder.mutation<
+      ApiResponse<Record<string, never>>,
+      { publicId: string; notePublicId: string }
+    >({
+      query: ({ publicId, notePublicId }) => ({
+        url: `/admin/enquiries/${publicId}/notes/${notePublicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: `NOTES_${publicId}` },
+        { type: 'Enquiries', id: publicId },
+      ],
+    }),
+
+    // Enquiry Follow-Ups
+    getEnquiryFollowUps: builder.query<ApiResponse<EnquiryFollowUp[]>, string>({
+      query: (publicId) => `/admin/enquiries/${publicId}/follow-ups`,
+      providesTags: (_res, _err, id) => [{ type: 'Enquiries', id: `FOLLOWUPS_${id}` }],
+    }),
+
+    createEnquiryFollowUp: builder.mutation<
+      ApiResponse<EnquiryFollowUp>,
+      { publicId: string; data: CreateFollowUpRequest }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/enquiries/${publicId}/follow-ups`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: `FOLLOWUPS_${publicId}` },
+        { type: 'Enquiries', id: publicId },
+      ],
+    }),
+
+    updateEnquiryFollowUp: builder.mutation<
+      ApiResponse<EnquiryFollowUp>,
+      { publicId: string; followUpPublicId: string; data: UpdateFollowUpRequest }
+    >({
+      query: ({ publicId, followUpPublicId, data }) => ({
+        url: `/admin/enquiries/${publicId}/follow-ups/${followUpPublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: `FOLLOWUPS_${publicId}` },
+        { type: 'Enquiries', id: publicId },
+      ],
+    }),
+
+    deleteEnquiryFollowUp: builder.mutation<
+      ApiResponse<Record<string, never>>,
+      { publicId: string; followUpPublicId: string }
+    >({
+      query: ({ publicId, followUpPublicId }) => ({
+        url: `/admin/enquiries/${publicId}/follow-ups/${followUpPublicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Enquiries', id: `FOLLOWUPS_${publicId}` },
+        { type: 'Enquiries', id: publicId },
+      ],
+    }),
+
+    // ==================== QUOTATIONS ====================
+    getQuotations: builder.query<ApiResponse<PaginatedQuotationsResult>, QuotationQueryParams | void>({
+      query: (params) => ({
+        url: '/admin/quotations',
+        params: params || {},
+      }),
+      providesTags: ['Quotations'],
+    }),
+
+    getQuotationByPublicId: builder.query<ApiResponse<QuotationDetail>, string>({
+      query: (publicId) => `/admin/quotations/${publicId}`,
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data?.quotation || response.data,
+      }),
+      providesTags: (_res, _err, id) => [{ type: 'Quotations', id }],
+    }),
+
+    createQuotation: builder.mutation<ApiResponse<QuotationDetail>, CreateQuotationPayload>({
+      query: (data) => ({
+        url: '/admin/quotations',
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data?.quotation || response.data,
+      }),
+      invalidatesTags: ['Quotations', 'Enquiries'],
+    }),
+
+    updateQuotation: builder.mutation<
+      ApiResponse<QuotationDetail>,
+      { publicId: string; data: UpdateQuotationPayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/quotations/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data?.quotation || response.data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => ['Quotations', { type: 'Quotations', id: publicId }],
+    }),
+
+    updateQuotationStatus: builder.mutation<
+      ApiResponse<QuotationDetail>,
+      { publicId: string; data: UpdateQuotationStatusPayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/quotations/${publicId}/status`,
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data?.quotation || response.data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => ['Quotations', { type: 'Quotations', id: publicId }],
+    }),
+
+    deleteQuotation: builder.mutation<ApiResponse<{ message: string }>, string>({
+      query: (publicId) => ({
+        url: `/admin/quotations/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Quotations'],
+    }),
+
+    addQuotationItem: builder.mutation<
+      ApiResponse<QuotationDetail>,
+      { publicId: string; data: CreateQuotationItemPayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/quotations/${publicId}/items`,
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data?.quotation || response.data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => ['Quotations', { type: 'Quotations', id: publicId }],
+    }),
+
+    updateQuotationItem: builder.mutation<
+      ApiResponse<QuotationDetail>,
+      { publicId: string; itemPublicId: string; data: UpdateQuotationItemPayload }
+    >({
+      query: ({ publicId, itemPublicId, data }) => ({
+        url: `/admin/quotations/${publicId}/items/${itemPublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data?.quotation || response.data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => ['Quotations', { type: 'Quotations', id: publicId }],
+    }),
+
+    deleteQuotationItem: builder.mutation<
+      ApiResponse<QuotationDetail>,
+      { publicId: string; itemPublicId: string }
+    >({
+      query: ({ publicId, itemPublicId }) => ({
+        url: `/admin/quotations/${publicId}/items/${itemPublicId}`,
+        method: 'DELETE',
+      }),
+      transformResponse: (response: ApiResponse<any>) => ({
+        ...response,
+        data: response.data?.quotation || response.data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => ['Quotations', { type: 'Quotations', id: publicId }],
+    }),
+
+    // ==================== ESTIMATOR ====================
+    getAdminEstimatorRules: builder.query<ApiResponse<PaginatedEstimatorRulesResult>, EstimatorQueryParams | void>({
+      query: (params) => ({
+        url: '/admin/estimator-rules',
+        params: params || {},
+      }),
+      providesTags: ['Estimator'],
+    }),
+
+    getAdminEstimatorRuleByPublicId: builder.query<ApiResponse<EstimatorRule>, string>({
+      query: (publicId) => `/admin/estimator-rules/${publicId}`,
+      providesTags: (_res, _err, id) => [{ type: 'Estimator', id }],
+    }),
+
+    createAdminEstimatorRule: builder.mutation<ApiResponse<EstimatorRule>, CreateEstimatorRulePayload>({
+      query: (data) => ({
+        url: '/admin/estimator-rules',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Estimator'],
+    }),
+
+    updateAdminEstimatorRule: builder.mutation<
+      ApiResponse<EstimatorRule>,
+      { publicId: string; data: UpdateEstimatorRulePayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/estimator-rules/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => ['Estimator', { type: 'Estimator', id: publicId }],
+    }),
+
+    deleteAdminEstimatorRule: builder.mutation<ApiResponse<{ message: string }>, string>({
+      query: (publicId) => ({
+        url: `/admin/estimator-rules/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Estimator'],
+    }),
+
+    calculateEstimate: builder.mutation<ApiResponse<CalculateEstimateResult>, CalculateEstimateRequest>({
+      query: (data) => ({
+        url: '/estimator/calculate',
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -618,6 +986,36 @@ export const {
   useAddProductSpecMutation,
   useUpdateProductSpecMutation,
   useDeleteProductSpecMutation,
+  // Enquiries & CRM
+  useGetEnquiriesQuery,
+  useGetEnquiryByPublicIdQuery,
+  useUpdateAdminEnquiryMutation,
+  useUpdateEnquiryStatusMutation,
+  useGetEnquiryNotesQuery,
+  useCreateEnquiryNoteMutation,
+  useUpdateEnquiryNoteMutation,
+  useDeleteEnquiryNoteMutation,
+  useGetEnquiryFollowUpsQuery,
+  useCreateEnquiryFollowUpMutation,
+  useUpdateEnquiryFollowUpMutation,
+  useDeleteEnquiryFollowUpMutation,
+  // Quotations
+  useGetQuotationsQuery,
+  useGetQuotationByPublicIdQuery,
+  useCreateQuotationMutation,
+  useUpdateQuotationMutation,
+  useUpdateQuotationStatusMutation,
+  useDeleteQuotationMutation,
+  useAddQuotationItemMutation,
+  useUpdateQuotationItemMutation,
+  useDeleteQuotationItemMutation,
+  // Estimator
+  useGetAdminEstimatorRulesQuery,
+  useGetAdminEstimatorRuleByPublicIdQuery,
+  useCreateAdminEstimatorRuleMutation,
+  useUpdateAdminEstimatorRuleMutation,
+  useDeleteAdminEstimatorRuleMutation,
+  useCalculateEstimateMutation,
 } = baseApi;
 
 export default baseApi;

@@ -4,7 +4,9 @@ import {
   LayoutDashboard,
   Package,
   Layers,
+  Inbox,
   FileText,
+  Calculator,
   Palette,
   Shield,
   Menu,
@@ -66,10 +68,19 @@ export function AdminLayout() {
       icon: <Layers className="w-5 h-5" />,
     },
     {
-      name: 'Quotations & B2B',
+      name: 'Enquiries & CRM',
+      path: '/admin/enquiries',
+      icon: <Inbox className="w-5 h-5" />,
+    },
+    {
+      name: 'Quotations',
       path: '/admin/quotations',
       icon: <FileText className="w-5 h-5" />,
-      badge: 'Next Step',
+    },
+    {
+      name: 'Pricing Estimator',
+      path: '/admin/estimator',
+      icon: <Calculator className="w-5 h-5" />,
     },
     {
       name: 'Theme & Settings',
