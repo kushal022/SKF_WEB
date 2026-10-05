@@ -105,6 +105,22 @@ const createPublicReview = async (data) => {
     status: 'pending',
   });
 
+  try {
+    const notificationService = require('./notification.service');
+    await notificationService.createForAdmins({
+      type: 'review',
+      title: 'New Customer Review Submitted',
+      message: `New ${data.rating}-star review from ${data.customer_name} awaiting moderation.`,
+      data: {
+        customer_name: data.customer_name,
+        rating: data.rating,
+      },
+      related_entity_type: 'Review',
+    });
+  } catch {
+    // Non-blocking notification dispatch
+  }
+
   return {
     public_id: newReview.public_id,
     customer_name: newReview.customer_name,

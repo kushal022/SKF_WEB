@@ -160,6 +160,23 @@ const createPublicEnquiry = async (data) => {
     status: 'new',
   });
 
+  try {
+    const notificationService = require('./notification.service');
+    await notificationService.createForAdmins({
+      type: 'enquiry',
+      title: 'New Website Enquiry',
+      message: `Enquiry from ${data.customer_name} (${data.phone})`,
+      data: {
+        enquiry_public_id: newEnquiry.public_id,
+        customer_name: data.customer_name,
+        phone: data.phone,
+      },
+      related_entity_type: 'Enquiry',
+    });
+  } catch {
+    // Non-blocking notification dispatch
+  }
+
   return {
     public_id: newEnquiry.public_id,
     customer_name: newEnquiry.customer_name,

@@ -17,15 +17,9 @@ export const tokenStorage = {
   getToken: () => inMemoryAccessToken,
   setToken: (token: string | null) => {
     inMemoryAccessToken = token;
-    if (typeof window !== 'undefined') {
-      (window as unknown as { __SKF_ACCESS_TOKEN__?: string | null }).__SKF_ACCESS_TOKEN__ = token;
-    }
   },
   clearToken: () => {
     inMemoryAccessToken = null;
-    if (typeof window !== 'undefined') {
-      delete (window as unknown as { __SKF_ACCESS_TOKEN__?: string }).__SKF_ACCESS_TOKEN__;
-    }
   },
 };
 

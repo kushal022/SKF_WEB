@@ -143,6 +143,15 @@ import type {
 
 export * from '../../types/theme';
 
+import type {
+  NotificationItem,
+  NotificationQueryParams,
+  PaginatedNotificationsResult,
+  CreateNotificationPayload,
+} from '../../types/notification';
+
+export * from '../../types/notification';
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
@@ -1468,6 +1477,86 @@ export const baseApi = createApi({
         { type: 'Quotations', id: 'LIST' },
       ],
     }),
+
+    // Notifications (Step 14)
+    getNotifications: builder.query<ApiResponse<PaginatedNotificationsResult>, NotificationQueryParams | void>({
+      query: (params = {}) => ({
+        url: '/admin/notifications',
+        params: params || {},
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map(({ public_id }) => ({
+                type: 'Notifications' as const,
+                id: public_id,
+              })),
+              { type: 'Notifications', id: 'LIST' },
+            ]
+          : [{ type: 'Notifications', id: 'LIST' }],
+    }),
+
+    getNotificationByPublicId: builder.query<ApiResponse<{ notification: NotificationItem }>, string>({
+      query: (publicId) => `/admin/notifications/${publicId}`,
+      providesTags: (_res, _err, publicId) => [{ type: 'Notifications', id: publicId }],
+    }),
+
+    getUnreadNotificationCount: builder.query<number, void>({
+      query: () => ({
+        url: '/admin/notifications',
+        params: { is_read: 'false', limit: 1 },
+      }),
+      transformResponse: (response: ApiResponse<PaginatedNotificationsResult>) => {
+        return response.data?.pagination?.total ?? 0;
+      },
+      providesTags: [{ type: 'Notifications', id: 'UNREAD_COUNT' }],
+    }),
+
+    markNotificationAsRead: builder.mutation<ApiResponse<{ notification: NotificationItem }>, string>({
+      query: (publicId) => ({
+        url: `/admin/notifications/${publicId}/read`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, publicId) => [
+        { type: 'Notifications', id: publicId },
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
+
+    markAllNotificationsAsRead: builder.mutation<ApiResponse<{ updated_count: number }>, void>({
+      query: () => ({
+        url: '/admin/notifications/read-all',
+        method: 'POST',
+      }),
+      invalidatesTags: [
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
+
+    deleteNotification: builder.mutation<ApiResponse<Record<string, never>>, string>({
+      query: (publicId) => ({
+        url: `/admin/notifications/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
+
+    createNotification: builder.mutation<ApiResponse<{ notification: NotificationItem }>, CreateNotificationPayload>({
+      query: (body) => ({
+        url: '/admin/notifications',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
   }),
 });
 
@@ -1591,6 +1680,14 @@ export const {
   useGetPublicQuotationQuery,
   useAcceptPublicQuotationMutation,
   useRejectPublicQuotationMutation,
+  // Notifications (Step 14)
+  useGetNotificationsQuery,
+  useGetNotificationByPublicIdQuery,
+  useGetUnreadNotificationCountQuery,
+  useMarkNotificationAsReadMutation,
+  useMarkAllNotificationsAsReadMutation,
+  useDeleteNotificationMutation,
+  useCreateNotificationMutation,
 } = baseApi;
 
 export default baseApi;

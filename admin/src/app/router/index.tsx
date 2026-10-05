@@ -24,6 +24,7 @@ import BusinessSettingsPage from '../../features/settings/pages/BusinessSettings
 import WebsiteSettingsPage from '../../features/settings/pages/WebsiteSettingsPage';
 import ThemePage from '../../features/theme/pages/ThemePage';
 import AnalyticsPage from '../../features/analytics/pages/AnalyticsPage';
+import NotificationCenterPage from '../../features/notifications/pages/NotificationCenterPage';
 import { EmptyState } from '../../components/ui';
 
 function StepPlaceholder({ stepTitle, description }: { stepTitle: string; description: string }) {
@@ -100,6 +101,7 @@ export function AppRouter() {
         <Route path="/theme" element={<Navigate to="/admin/theme" replace />} />
         <Route path="/theme-settings" element={<Navigate to="/admin/theme" replace />} />
         <Route path="/analytics" element={<Navigate to="/admin/analytics" replace />} />
+        <Route path="/notifications" element={<Navigate to="/admin/notifications" replace />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -158,6 +160,9 @@ export function AppRouter() {
 
           {/* Basic Analytics & KPI Telemetry (Step 12) */}
           <Route path="analytics" element={<AnalyticsPage />} />
+
+          {/* Notifications Center (Step 14) */}
+          <Route path="notifications" element={<NotificationCenterPage />} />
           <Route
             path="audit"
             element={

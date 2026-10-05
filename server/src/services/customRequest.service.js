@@ -67,7 +67,7 @@ const sanitizeCustomRequest = (reqObj, isAdmin = false) => {
  * Transactionally creates custom_request + optional custom_request_images + linked enquiry.
  */
 const createPublicCustomRequest = async (data) => {
-  return CustomRequest.transaction(async (trx) => {
+  const result = await CustomRequest.transaction(async (trx) => {
     const { images, ...requestData } = data;
 
     const newRequest = await CustomRequest.query(trx).insertAndFetch({
@@ -122,6 +122,25 @@ const createPublicCustomRequest = async (data) => {
       created_at: newRequest.created_at,
     };
   });
+
+  try {
+    const notificationService = require('./notification.service');
+    await notificationService.createForAdmins({
+      type: 'custom_request',
+      title: 'New Custom Furniture Request',
+      message: `Custom request for ${result.product_type} from ${result.customer_name}`,
+      data: {
+        custom_request_public_id: result.public_id,
+        customer_name: result.customer_name,
+        product_type: result.product_type,
+      },
+      related_entity_type: 'CustomRequest',
+    });
+  } catch {
+    // Non-blocking notification dispatch
+  }
+
+  return result;
 };
 
 /**
