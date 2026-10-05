@@ -16,6 +16,9 @@ import QuotationDetailPage from '../../features/quotations/pages/QuotationDetail
 import EstimatorPage from '../../features/estimator/pages/EstimatorPage';
 import CustomRequestListPage from '../../features/customRequests/pages/CustomRequestListPage';
 import CustomRequestDetailPage from '../../features/customRequests/pages/CustomRequestDetailPage';
+import GalleryListPage from '../../features/gallery/pages/GalleryListPage';
+import GalleryDetailPage from '../../features/gallery/pages/GalleryDetailPage';
+import ReviewListPage from '../../features/reviews/pages/ReviewListPage';
 import { EmptyState } from '../../components/ui';
 
 function StepPlaceholder({ stepTitle, description }: { stepTitle: string; description: string }) {
@@ -53,6 +56,11 @@ function CustomRequestDetailRedirect() {
   return <Navigate to={`/admin/custom-requests/${id}`} replace />;
 }
 
+function GalleryDetailRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/admin/gallery/${id}`} replace />;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -76,6 +84,9 @@ export function AppRouter() {
         <Route path="/estimator" element={<Navigate to="/admin/estimator" replace />} />
         <Route path="/custom-requests" element={<Navigate to="/admin/custom-requests" replace />} />
         <Route path="/custom-requests/:id" element={<CustomRequestDetailRedirect />} />
+        <Route path="/gallery" element={<Navigate to="/admin/gallery" replace />} />
+        <Route path="/gallery/:id" element={<GalleryDetailRedirect />} />
+        <Route path="/reviews" element={<Navigate to="/admin/reviews" replace />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -113,6 +124,13 @@ export function AppRouter() {
           {/* Custom Furniture Requests Management */}
           <Route path="custom-requests" element={<CustomRequestListPage />} />
           <Route path="custom-requests/:id" element={<CustomRequestDetailPage />} />
+
+          {/* Gallery & Project Showcase */}
+          <Route path="gallery" element={<GalleryListPage />} />
+          <Route path="gallery/:id" element={<GalleryDetailPage />} />
+
+          {/* Customer Reviews & Moderation */}
+          <Route path="reviews" element={<ReviewListPage />} />
           <Route
             path="theme-settings"
             element={

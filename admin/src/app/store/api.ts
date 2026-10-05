@@ -93,6 +93,30 @@ import type {
 
 export * from '../../types/customRequest';
 
+import type {
+  GalleryItem,
+  GalleryImage,
+  GalleryQueryParams,
+  PaginatedGalleriesResult,
+  CreateGalleryPayload,
+  UpdateGalleryPayload,
+  CreateGalleryImagePayload,
+  UpdateGalleryImagePayload,
+} from '../../types/gallery';
+
+export * from '../../types/gallery';
+
+import type {
+  ReviewItem,
+  ReviewQueryParams,
+  PaginatedReviewsResult,
+  UpdateReviewPayload,
+  UpdateReviewStatusPayload,
+  SetReviewFeaturedPayload,
+} from '../../types/review';
+
+export * from '../../types/review';
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
@@ -1061,6 +1085,217 @@ export const baseApi = createApi({
         { type: 'CustomRequests', id: `IMAGES_${publicId}` },
       ],
     }),
+
+    // ==================== GALLERIES ====================
+    getGalleries: builder.query<
+      ApiResponse<PaginatedGalleriesResult>,
+      GalleryQueryParams | void
+    >({
+      query: (params) => ({
+        url: '/admin/galleries',
+        params: params || {},
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map(({ public_id }) => ({
+                type: 'Galleries' as const,
+                id: public_id,
+              })),
+              { type: 'Galleries', id: 'LIST' },
+            ]
+          : [{ type: 'Galleries', id: 'LIST' }],
+    }),
+
+    getGalleryByPublicId: builder.query<ApiResponse<GalleryItem>, string>({
+      query: (publicId) => `/admin/galleries/${publicId}`,
+      providesTags: (_res, _err, id) => [{ type: 'Galleries', id }],
+    }),
+
+    createGallery: builder.mutation<ApiResponse<GalleryItem>, CreateGalleryPayload>({
+      query: (data) => ({
+        url: '/admin/galleries',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'Galleries', id: 'LIST' }],
+    }),
+
+    updateGallery: builder.mutation<
+      ApiResponse<GalleryItem>,
+      { publicId: string; data: UpdateGalleryPayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/galleries/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Galleries', id: 'LIST' },
+        { type: 'Galleries', id: publicId },
+      ],
+    }),
+
+    deleteGallery: builder.mutation<ApiResponse<{ message: string }>, string>({
+      query: (publicId) => ({
+        url: `/admin/galleries/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Galleries', id: 'LIST' }],
+    }),
+
+    publishGallery: builder.mutation<ApiResponse<GalleryItem>, string>({
+      query: (publicId) => ({
+        url: `/admin/galleries/${publicId}/publish`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, publicId) => [
+        { type: 'Galleries', id: 'LIST' },
+        { type: 'Galleries', id: publicId },
+      ],
+    }),
+
+    archiveGallery: builder.mutation<ApiResponse<GalleryItem>, string>({
+      query: (publicId) => ({
+        url: `/admin/galleries/${publicId}/archive`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, publicId) => [
+        { type: 'Galleries', id: 'LIST' },
+        { type: 'Galleries', id: publicId },
+      ],
+    }),
+
+    getGalleryImages: builder.query<ApiResponse<GalleryImage[]>, string>({
+      query: (publicId) => `/admin/galleries/${publicId}/images`,
+      providesTags: (_res, _err, id) => [{ type: 'Galleries', id: `IMAGES_${id}` }],
+    }),
+
+    addGalleryImage: builder.mutation<
+      ApiResponse<GalleryImage>,
+      { publicId: string; data: CreateGalleryImagePayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/galleries/${publicId}/images`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Galleries', id: publicId },
+        { type: 'Galleries', id: `IMAGES_${publicId}` },
+      ],
+    }),
+
+    updateGalleryImage: builder.mutation<
+      ApiResponse<GalleryImage>,
+      { publicId: string; imagePublicId: string; data: UpdateGalleryImagePayload }
+    >({
+      query: ({ publicId, imagePublicId, data }) => ({
+        url: `/admin/galleries/${publicId}/images/${imagePublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Galleries', id: publicId },
+        { type: 'Galleries', id: `IMAGES_${publicId}` },
+      ],
+    }),
+
+    deleteGalleryImage: builder.mutation<
+      ApiResponse<{ message: string }>,
+      { publicId: string; imagePublicId: string }
+    >({
+      query: ({ publicId, imagePublicId }) => ({
+        url: `/admin/galleries/${publicId}/images/${imagePublicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Galleries', id: publicId },
+        { type: 'Galleries', id: `IMAGES_${publicId}` },
+      ],
+    }),
+
+    // ==========================================
+    // Reviews & Ratings Moderation (Step 8)
+    // ==========================================
+    getReviews: builder.query<ApiResponse<PaginatedReviewsResult>, ReviewQueryParams | void>({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params) {
+          if (params.page) queryParams.set('page', String(params.page));
+          if (params.limit) queryParams.set('limit', String(params.limit));
+          if (params.status) queryParams.set('status', params.status);
+          if (params.rating) queryParams.set('rating', String(params.rating));
+          if (params.is_featured !== undefined && params.is_featured !== '') {
+            queryParams.set('is_featured', String(params.is_featured));
+          }
+          if (params.product_public_id) queryParams.set('product_public_id', params.product_public_id);
+          if (params.search) queryParams.set('search', params.search);
+          if (params.sort) queryParams.set('sort', params.sort);
+        }
+        const qs = queryParams.toString();
+        return `/admin/reviews${qs ? `?${qs}` : ''}`;
+      },
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map((r) => ({ type: 'Reviews' as const, id: r.public_id })),
+              { type: 'Reviews' as const, id: 'LIST' },
+            ]
+          : [{ type: 'Reviews' as const, id: 'LIST' }],
+    }),
+
+    getReviewByPublicId: builder.query<ApiResponse<ReviewItem>, string>({
+      query: (publicId) => `/admin/reviews/${publicId}`,
+      providesTags: (_result, _error, publicId) => [{ type: 'Reviews', id: publicId }],
+    }),
+
+    updateReview: builder.mutation<ApiResponse<ReviewItem>, { publicId: string; data: UpdateReviewPayload }>({
+      query: ({ publicId, data }) => ({
+        url: `/admin/reviews/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Reviews', id: publicId },
+        { type: 'Reviews', id: 'LIST' },
+      ],
+    }),
+
+    updateReviewStatus: builder.mutation<ApiResponse<ReviewItem>, { publicId: string; data: UpdateReviewStatusPayload }>({
+      query: ({ publicId, data }) => ({
+        url: `/admin/reviews/${publicId}/status`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Reviews', id: publicId },
+        { type: 'Reviews', id: 'LIST' },
+      ],
+    }),
+
+    setReviewFeatured: builder.mutation<ApiResponse<ReviewItem>, { publicId: string; data: SetReviewFeaturedPayload }>({
+      query: ({ publicId, data }) => ({
+        url: `/admin/reviews/${publicId}/featured`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'Reviews', id: publicId },
+        { type: 'Reviews', id: 'LIST' },
+      ],
+    }),
+
+    deleteReview: builder.mutation<ApiResponse<void>, string>({
+      query: (publicId) => ({
+        url: `/admin/reviews/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, publicId) => [
+        { type: 'Reviews', id: publicId },
+        { type: 'Reviews', id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -1144,6 +1379,25 @@ export const {
   useAddCustomRequestImageMutation,
   useUpdateCustomRequestImageMutation,
   useDeleteCustomRequestImageMutation,
+  // Galleries & Project Showcase
+  useGetGalleriesQuery,
+  useGetGalleryByPublicIdQuery,
+  useCreateGalleryMutation,
+  useUpdateGalleryMutation,
+  useDeleteGalleryMutation,
+  usePublishGalleryMutation,
+  useArchiveGalleryMutation,
+  useGetGalleryImagesQuery,
+  useAddGalleryImageMutation,
+  useUpdateGalleryImageMutation,
+  useDeleteGalleryImageMutation,
+  // Customer Reviews & Moderation
+  useGetReviewsQuery,
+  useGetReviewByPublicIdQuery,
+  useUpdateReviewMutation,
+  useUpdateReviewStatusMutation,
+  useSetReviewFeaturedMutation,
+  useDeleteReviewMutation,
 } = baseApi;
 
 export default baseApi;

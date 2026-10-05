@@ -8,6 +8,8 @@ import {
   FileText,
   Calculator,
   Sparkles,
+  Images,
+  Star,
   Palette,
   Shield,
   Menu,
@@ -87,6 +89,16 @@ export function AdminLayout() {
       name: 'Custom Requests',
       path: '/admin/custom-requests',
       icon: <Sparkles className="w-5 h-5" />,
+    },
+    {
+      name: 'Gallery & Projects',
+      path: '/admin/gallery',
+      icon: <Images className="w-5 h-5" />,
+    },
+    {
+      name: 'Customer Reviews',
+      path: '/admin/reviews',
+      icon: <Star className="w-5 h-5" />,
     },
     {
       name: 'Theme & Settings',
