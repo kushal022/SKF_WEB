@@ -6,7 +6,7 @@ import {
   useDeleteProductVideoMutation,
 } from '../../../../app/store/api';
 import type { CreateVideoRequest } from '../../../../types/catalog';
-import { Button, Input, Modal, Badge, useToast, Card, EmptyState, LoadingState } from '../../../../components/ui';
+import { Button, Input, Modal, Badge, useToast, Card, EmptyState, LoadingState, ImageUpload } from '../../../../components/ui';
 
 interface ProductVideoSectionProps {
   productPublicId: string;
@@ -204,12 +204,15 @@ export function ProductVideoSection({ productPublicId }: ProductVideoSectionProp
             disabled={isAdding}
           />
 
-          <Input
-            label="Custom Thumbnail URL (Optional)"
-            placeholder="https://images.skffurniture.com/video-thumb.webp"
+          <ImageUpload
+            label="Custom Thumbnail Image (Optional)"
             value={thumbnailUrl}
-            onChange={(e) => setThumbnailUrl(e.target.value)}
+            onChange={(url) => setThumbnailUrl(url)}
+            onRemove={() => setThumbnailUrl('')}
+            folder="products"
+            aspectRatio="video"
             disabled={isAdding}
+            helperText="Upload custom video cover thumbnail (recommended: 16:9 JPG, PNG, or WEBP)"
           />
 
           <div className="grid grid-cols-2 gap-4">

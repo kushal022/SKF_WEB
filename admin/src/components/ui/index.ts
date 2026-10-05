@@ -11,3 +11,5 @@ export * from './ToastContext';
 export * from './useToast';
 export * from './StateViews';
 export * from './FileUpload';
+export * from './ImageUpload';
+

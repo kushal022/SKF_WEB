@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -12,8 +13,12 @@ const ApiResponse = require('./utils/apiResponse');
 
 const app = express();
 
-// 1. Basic Security Headers with Helmet
-app.use(helmet());
+// 1. Basic Security Headers with Helmet (allow cross-origin media rendering)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 
 // 2. CORS Configuration
 const allowedOrigins = config.cors.allowedOrigins;
@@ -62,7 +67,10 @@ app.get('/health', (req, res) => {
   );
 });
 
-// 6. Mount Versioned API Routes (/api/v1)
+// 6. Serve static uploads (for local development storage)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// 7. Mount Versioned API Routes (/api/v1)
 app.use(config.apiPrefix, apiRoutes);
 
 // 7. 404 Route Handler

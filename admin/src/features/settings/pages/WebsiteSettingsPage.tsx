@@ -29,6 +29,7 @@ import {
   LoadingState,
   useToast,
   Badge,
+  ImageUpload,
 } from '../../../components/ui';
 import type { WebsiteSettings, UpdateWebsiteSettingsPayload } from '../../../types/settings';
 
@@ -422,34 +423,25 @@ function WebsiteSettingsForm({
                     Visual Assets & Logos
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                      Primary Logo URL
-                    </label>
-                    <Input
-                      value={logoUrl}
-                      onChange={(e) => handleFieldChange(setLogoUrl, e.target.value)}
-                      placeholder="https://res.cloudinary.com/.../logo.png"
-                    />
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      Recommended: Transparent PNG or SVG, minimum 300x80px.
-                    </p>
-                  </div>
+                <CardContent className="space-y-5">
+                  <ImageUpload
+                    label="Website Logo"
+                    value={logoUrl}
+                    onChange={(url) => handleFieldChange(setLogoUrl, url)}
+                    onRemove={() => handleFieldChange(setLogoUrl, '')}
+                    folder="branding"
+                    helperText="Upload transparent PNG, SVG, or WEBP logo (minimum 300x80px)"
+                  />
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                      Favicon URL
-                    </label>
-                    <Input
-                      value={faviconUrl}
-                      onChange={(e) => handleFieldChange(setFaviconUrl, e.target.value)}
-                      placeholder="https://res.cloudinary.com/.../favicon.ico"
-                    />
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      Square icon (16x16, 32x32, or 64x64) used in browser tabs.
-                    </p>
-                  </div>
+                  <ImageUpload
+                    label="Website Favicon"
+                    value={faviconUrl}
+                    onChange={(url) => handleFieldChange(setFaviconUrl, url)}
+                    onRemove={() => handleFieldChange(setFaviconUrl, '')}
+                    folder="branding"
+                    aspectRatio="square"
+                    helperText="Upload square icon (16x16, 32x32, or 64x64 PNG, ICO, or WEBP)"
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -936,28 +928,27 @@ function WebsiteSettingsForm({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                        OG Title
-                      </label>
-                      <Input
-                        value={ogTitle}
-                        onChange={(e) => handleFieldChange(setOgTitle, e.target.value)}
-                        placeholder="Same as Meta Title if blank"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                      OG Title
+                    </label>
+                    <Input
+                      value={ogTitle}
+                      onChange={(e) => handleFieldChange(setOgTitle, e.target.value)}
+                      placeholder="Same as Meta Title if blank"
+                    />
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                        OG Image URL
-                      </label>
-                      <Input
-                        value={ogImage}
-                        onChange={(e) => handleFieldChange(setOgImage, e.target.value)}
-                        placeholder="https://.../og-banner.jpg"
-                      />
-                    </div>
+                  <div>
+                    <ImageUpload
+                      label="OG / Social Share Image"
+                      value={ogImage}
+                      onChange={(url) => handleFieldChange(setOgImage, url)}
+                      onRemove={() => handleFieldChange(setOgImage, '')}
+                      folder="seo"
+                      aspectRatio="wide"
+                      helperText="Upload social banner (recommended: 1200x630px JPG, PNG, or WEBP)"
+                    />
                   </div>
 
                   <div>

@@ -20,6 +20,8 @@ const orderController = require('../controllers/order.controller');
 const paymentController = require('../controllers/payment.controller');
 const notificationController = require('../controllers/notification.controller');
 const auditLogController = require('../controllers/auditLog.controller');
+const uploadController = require('../controllers/upload.controller');
+const { uploadSingle } = require('../middleware/upload.middleware');
 
 // Validators
 const { updateSettingsSchema } = require('../validators/settings.validator');
@@ -140,6 +142,10 @@ const router = express.Router();
 
 // Enforce authentication and administrative role authorization across all admin routes
 router.use(authenticate, authorizeRoles('admin'));
+
+// ==================== MEDIA / UPLOADS ====================
+router.post('/uploads', uploadSingle('file'), uploadController.uploadImage);
+router.post('/media/upload', uploadSingle('file'), uploadController.uploadImage);
 
 // ==================== ADMIN CORE ====================
 router.get('/me', adminController.getMe);

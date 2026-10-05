@@ -159,6 +159,18 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 
+export interface UploadMediaResponseData {
+  url: string;
+  secure_url: string;
+  public_id: string;
+  format?: string;
+  width?: number | null;
+  height?: number | null;
+  bytes?: number;
+  original_filename?: string;
+  storage?: 'cloudinary' | 'local';
+}
+
 export interface SessionItem {
   public_id: string;
   device_info?: string | null;
@@ -1557,6 +1569,25 @@ export const baseApi = createApi({
         { type: 'Notifications', id: 'UNREAD_COUNT' },
       ],
     }),
+
+    // Media & Image Uploads (Cloudinary pipeline)
+    uploadMedia: builder.mutation<
+      ApiResponse<UploadMediaResponseData>,
+      { file: File; folder?: string }
+    >({
+      query: ({ file, folder }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (folder) {
+          formData.append('folder', folder);
+        }
+        return {
+          url: '/admin/uploads',
+          method: 'POST',
+          body: formData,
+        };
+      },
+    }),
   }),
 });
 
@@ -1688,6 +1719,8 @@ export const {
   useMarkAllNotificationsAsReadMutation,
   useDeleteNotificationMutation,
   useCreateNotificationMutation,
+  // Media / Cloudinary Uploads
+  useUploadMediaMutation,
 } = baseApi;
 
 export default baseApi;
