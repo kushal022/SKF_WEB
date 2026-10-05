@@ -7,6 +7,7 @@ import {
   Inbox,
   FileText,
   Calculator,
+  Sparkles,
   Palette,
   Shield,
   Menu,
@@ -81,6 +82,11 @@ export function AdminLayout() {
       name: 'Pricing Estimator',
       path: '/admin/estimator',
       icon: <Calculator className="w-5 h-5" />,
+    },
+    {
+      name: 'Custom Requests',
+      path: '/admin/custom-requests',
+      icon: <Sparkles className="w-5 h-5" />,
     },
     {
       name: 'Theme & Settings',

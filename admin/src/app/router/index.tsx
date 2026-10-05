@@ -14,6 +14,8 @@ import QuotationListPage from '../../features/quotations/pages/QuotationListPage
 import QuotationCreatePage from '../../features/quotations/pages/QuotationCreatePage';
 import QuotationDetailPage from '../../features/quotations/pages/QuotationDetailPage';
 import EstimatorPage from '../../features/estimator/pages/EstimatorPage';
+import CustomRequestListPage from '../../features/customRequests/pages/CustomRequestListPage';
+import CustomRequestDetailPage from '../../features/customRequests/pages/CustomRequestDetailPage';
 import { EmptyState } from '../../components/ui';
 
 function StepPlaceholder({ stepTitle, description }: { stepTitle: string; description: string }) {
@@ -46,6 +48,11 @@ function QuotationDetailRedirect() {
   return <Navigate to={`/admin/quotations/${id}`} replace />;
 }
 
+function CustomRequestDetailRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/admin/custom-requests/${id}`} replace />;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -67,6 +74,8 @@ export function AppRouter() {
         <Route path="/quotations/new" element={<Navigate to="/admin/quotations/new" replace />} />
         <Route path="/quotations/:id" element={<QuotationDetailRedirect />} />
         <Route path="/estimator" element={<Navigate to="/admin/estimator" replace />} />
+        <Route path="/custom-requests" element={<Navigate to="/admin/custom-requests" replace />} />
+        <Route path="/custom-requests/:id" element={<CustomRequestDetailRedirect />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -100,6 +109,10 @@ export function AppRouter() {
 
           {/* Pricing Estimator Management */}
           <Route path="estimator" element={<EstimatorPage />} />
+
+          {/* Custom Furniture Requests Management */}
+          <Route path="custom-requests" element={<CustomRequestListPage />} />
+          <Route path="custom-requests/:id" element={<CustomRequestDetailPage />} />
           <Route
             path="theme-settings"
             element={

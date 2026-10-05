@@ -624,6 +624,12 @@ function QuotationCreateForm({
 export function QuotationCreatePage() {
   const [searchParams] = useSearchParams();
   const enquiryId = searchParams.get('enquiryId');
+  const paramCustomerName = searchParams.get('customerName') || '';
+  const paramCustomerPhone = searchParams.get('customerPhone') || '';
+  const paramCustomerEmail = searchParams.get('customerEmail') || '';
+  const paramNotes = searchParams.get('notes') || '';
+  const paramProductType = searchParams.get('productType') || '';
+  const paramEstimatedAmount = searchParams.get('estimatedAmount');
 
   const { data: enquiryRes, isLoading: isEnquiryLoading } = useGetEnquiryByPublicIdQuery(enquiryId || '', {
     skip: !enquiryId,
@@ -636,7 +642,7 @@ export function QuotationCreatePage() {
   if (enquiryId && isEnquiryLoading) {
     return (
       <div className="py-12">
-        <LoadingState message="Loading linked enquiry customer details..." />
+        <LoadingState message="Loading linked customer details..." />
       </div>
     );
   }
@@ -656,26 +662,32 @@ export function QuotationCreatePage() {
     : [
         {
           tempId: 'item-1',
-          description: '',
+          description: paramProductType
+            ? `Custom ${paramProductType.replace(/_/g, ' ')} fabrication`
+            : '',
           quantity: 1,
-          unit_price: 0,
+          unit_price: paramEstimatedAmount ? Number(paramEstimatedAmount) : 0,
           customization_amount: 0,
           discount_amount: 0,
           product_public_id: null,
         },
       ];
 
+  const resolvedName = linkedEnquiry?.customer_name || paramCustomerName;
+  const resolvedPhone = linkedEnquiry?.phone || paramCustomerPhone;
+  const resolvedEmail = linkedEnquiry?.email || paramCustomerEmail;
+  const resolvedNotes =
+    linkedEnquiry?.message
+      ? `Customer requirement from enquiry:\n${linkedEnquiry.message}`
+      : paramNotes;
+
   return (
     <QuotationCreateForm
-      key={linkedEnquiry?.public_id || 'direct'}
-      initialCustomerName={linkedEnquiry?.customer_name || ''}
-      initialCustomerPhone={linkedEnquiry?.phone || ''}
-      initialCustomerEmail={linkedEnquiry?.email || ''}
-      initialNotes={
-        linkedEnquiry?.message
-          ? `Customer requirement from enquiry:\n${linkedEnquiry.message}`
-          : ''
-      }
+      key={linkedEnquiry?.public_id || paramCustomerName || 'direct'}
+      initialCustomerName={resolvedName}
+      initialCustomerPhone={resolvedPhone}
+      initialCustomerEmail={resolvedEmail}
+      initialNotes={resolvedNotes}
       initialItems={defaultItems}
       enquiryId={enquiryId}
       catalogProducts={catalogProducts}

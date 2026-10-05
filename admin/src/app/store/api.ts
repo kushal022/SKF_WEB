@@ -80,6 +80,19 @@ import type {
 
 export * from '../../types/estimator';
 
+import type {
+  CustomRequestDetail,
+  CustomRequestImage,
+  CustomRequestQueryParams,
+  PaginatedCustomRequestsResult,
+  UpdateCustomRequestPayload,
+  UpdateCustomRequestStatusPayload,
+  CreateCustomRequestImagePayload,
+  UpdateCustomRequestImagePayload,
+} from '../../types/customRequest';
+
+export * from '../../types/customRequest';
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
@@ -942,6 +955,112 @@ export const baseApi = createApi({
         body: data,
       }),
     }),
+
+    // ==================== CUSTOM FURNITURE REQUESTS ====================
+    getCustomRequests: builder.query<
+      ApiResponse<PaginatedCustomRequestsResult>,
+      CustomRequestQueryParams | void
+    >({
+      query: (params) => ({
+        url: '/admin/custom-requests',
+        params: params || {},
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map(({ public_id }) => ({
+                type: 'CustomRequests' as const,
+                id: public_id,
+              })),
+              { type: 'CustomRequests', id: 'LIST' },
+            ]
+          : [{ type: 'CustomRequests', id: 'LIST' }],
+    }),
+
+    getCustomRequestByPublicId: builder.query<ApiResponse<CustomRequestDetail>, string>({
+      query: (publicId) => `/admin/custom-requests/${publicId}`,
+      providesTags: (_res, _err, id) => [{ type: 'CustomRequests', id }],
+    }),
+
+    updateCustomRequest: builder.mutation<
+      ApiResponse<CustomRequestDetail>,
+      { publicId: string; data: UpdateCustomRequestPayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/custom-requests/${publicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'CustomRequests', id: 'LIST' },
+        { type: 'CustomRequests', id: publicId },
+      ],
+    }),
+
+    updateCustomRequestStatus: builder.mutation<
+      ApiResponse<CustomRequestDetail>,
+      { publicId: string; data: UpdateCustomRequestStatusPayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/custom-requests/${publicId}/status`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'CustomRequests', id: 'LIST' },
+        { type: 'CustomRequests', id: publicId },
+        'Enquiries',
+      ],
+    }),
+
+    getCustomRequestImages: builder.query<ApiResponse<CustomRequestImage[]>, string>({
+      query: (publicId) => `/admin/custom-requests/${publicId}/images`,
+      providesTags: (_res, _err, id) => [{ type: 'CustomRequests', id: `IMAGES_${id}` }],
+    }),
+
+    addCustomRequestImage: builder.mutation<
+      ApiResponse<CustomRequestImage>,
+      { publicId: string; data: CreateCustomRequestImagePayload }
+    >({
+      query: ({ publicId, data }) => ({
+        url: `/admin/custom-requests/${publicId}/images`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'CustomRequests', id: publicId },
+        { type: 'CustomRequests', id: `IMAGES_${publicId}` },
+      ],
+    }),
+
+    updateCustomRequestImage: builder.mutation<
+      ApiResponse<CustomRequestImage>,
+      { publicId: string; imagePublicId: string; data: UpdateCustomRequestImagePayload }
+    >({
+      query: ({ publicId, imagePublicId, data }) => ({
+        url: `/admin/custom-requests/${publicId}/images/${imagePublicId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'CustomRequests', id: publicId },
+        { type: 'CustomRequests', id: `IMAGES_${publicId}` },
+      ],
+    }),
+
+    deleteCustomRequestImage: builder.mutation<
+      ApiResponse<{ message: string }>,
+      { publicId: string; imagePublicId: string }
+    >({
+      query: ({ publicId, imagePublicId }) => ({
+        url: `/admin/custom-requests/${publicId}/images/${imagePublicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [
+        { type: 'CustomRequests', id: publicId },
+        { type: 'CustomRequests', id: `IMAGES_${publicId}` },
+      ],
+    }),
   }),
 });
 
@@ -1016,6 +1135,15 @@ export const {
   useUpdateAdminEstimatorRuleMutation,
   useDeleteAdminEstimatorRuleMutation,
   useCalculateEstimateMutation,
+  // Custom Furniture Requests
+  useGetCustomRequestsQuery,
+  useGetCustomRequestByPublicIdQuery,
+  useUpdateCustomRequestMutation,
+  useUpdateCustomRequestStatusMutation,
+  useGetCustomRequestImagesQuery,
+  useAddCustomRequestImageMutation,
+  useUpdateCustomRequestImageMutation,
+  useDeleteCustomRequestImageMutation,
 } = baseApi;
 
 export default baseApi;
