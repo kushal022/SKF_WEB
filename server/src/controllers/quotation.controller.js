@@ -56,6 +56,23 @@ const deleteQuotationItem = asyncHandler(async (req, res) => {
   return res.status(200).json(ApiResponse.success('Quotation item deleted successfully', { quotation }));
 });
 
+// ==================== PUBLIC QUOTATION SHARING ====================
+
+const getPublicQuotationByPublicId = asyncHandler(async (req, res) => {
+  const quotation = await quotationService.getPublicQuotationByPublicId(req.params.publicId);
+  return res.status(200).json(ApiResponse.success('Quotation retrieved successfully', { quotation }));
+});
+
+const acceptPublicQuotation = asyncHandler(async (req, res) => {
+  const quotation = await quotationService.acceptPublicQuotation(req.params.publicId, req);
+  return res.status(200).json(ApiResponse.success('Quotation accepted successfully', { quotation }));
+});
+
+const rejectPublicQuotation = asyncHandler(async (req, res) => {
+  const quotation = await quotationService.rejectPublicQuotation(req.params.publicId, req.body, req);
+  return res.status(200).json(ApiResponse.success('Quotation rejected successfully', { quotation }));
+});
+
 module.exports = {
   getAdminQuotations,
   getAdminQuotationByPublicId,
@@ -66,4 +83,8 @@ module.exports = {
   addQuotationItem,
   updateQuotationItem,
   deleteQuotationItem,
+  // Public
+  getPublicQuotationByPublicId,
+  acceptPublicQuotation,
+  rejectPublicQuotation,
 };
