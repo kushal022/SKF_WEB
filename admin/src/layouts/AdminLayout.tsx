@@ -10,8 +10,7 @@ import {
   Sparkles,
   Images,
   Star,
-  Building2,
-  Globe,
+  Settings,
   Palette,
   BarChart3,
   Shield,
@@ -117,20 +116,15 @@ export function AdminLayout() {
       icon: <Star className="w-5 h-5" />,
     },
     {
-      name: 'Website Settings',
+      name: 'Settings',
       path: '/admin/settings',
-      icon: <Globe className="w-5 h-5" />,
+      icon: <Settings className="w-5 h-5" />,
     },
     {
       name: 'Theme & Appearance',
       path: '/admin/theme',
       icon: <Palette className="w-5 h-5" />,
       badge: 'Step 13',
-    },
-    {
-      name: 'Business Settings',
-      path: '/admin/settings/business',
-      icon: <Building2 className="w-5 h-5" />,
     },
     {
       name: 'Notifications',
