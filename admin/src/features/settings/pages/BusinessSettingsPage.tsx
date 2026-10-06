@@ -25,6 +25,7 @@ import {
   Input,
   LoadingState,
   useToast,
+  ImageUpload,
 } from '../../../components/ui';
 import type { WebsiteSettings, UpdateWebsiteSettingsPayload } from '../../../types/settings';
 
@@ -228,43 +229,27 @@ function BusinessSettingsForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                  Logo Image URL
-                </label>
-                <Input
-                  value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="https://example.com/skf-logo.png"
-                  disabled={isSaving}
-                />
-                {logoUrl && (
-                  <div className="mt-2 p-2 rounded-lg border border-[var(--border-border)] bg-[var(--surface-muted)] flex items-center gap-2">
-                    <img
-                      src={logoUrl}
-                      alt="Logo preview"
-                      className="h-8 max-w-[120px] object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = 'none';
-                      }}
-                    />
-                    <span className="text-[10px] text-[var(--text-muted)]">Live Logo Preview</span>
-                  </div>
-                )}
-              </div>
+            <div className="space-y-5">
+              <ImageUpload
+                label="Business Logo"
+                value={logoUrl}
+                onChange={(url) => setLogoUrl(url)}
+                onRemove={() => setLogoUrl('')}
+                folder="branding"
+                disabled={isSaving}
+                helperText="Upload transparent PNG, SVG, or WEBP logo (minimum 300x80px)"
+              />
 
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                  Favicon URL
-                </label>
-                <Input
-                  value={faviconUrl}
-                  onChange={(e) => setFaviconUrl(e.target.value)}
-                  placeholder="https://example.com/favicon.ico"
-                  disabled={isSaving}
-                />
-              </div>
+              <ImageUpload
+                label="Favicon"
+                value={faviconUrl}
+                onChange={(url) => setFaviconUrl(url)}
+                onRemove={() => setFaviconUrl('')}
+                folder="branding"
+                aspectRatio="square"
+                disabled={isSaving}
+                helperText="Upload square favicon icon (16x16, 32x32, or 64x64 PNG or ICO)"
+              />
             </div>
           </CardContent>
         </Card>

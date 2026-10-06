@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Input, Select, Button } from '../../../components/ui';
+import { Modal, Input, Select, Button, ImageUpload } from '../../../components/ui';
 import type { CategoryItem, CreateCategoryRequest, UpdateCategoryRequest } from '../../../types/catalog';
 
 interface CategoryFormModalProps {
@@ -181,18 +181,19 @@ function CategoryFormContent({
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label="Category Image URL"
-          placeholder="https://example.com/images/category.webp"
+      <div className="space-y-4">
+        <ImageUpload
+          label="Category Cover Image"
           value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
+          onChange={(url) => setImageUrl(url)}
+          onRemove={() => setImageUrl('')}
+          folder="categories"
           disabled={isLoading}
-          helperText="Preview image for client browsing"
+          helperText="Upload category thumbnail or hero banner (PNG, JPG, WEBP)"
         />
 
-        <div className="flex flex-col justify-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-2 block">
+        <div className="flex flex-col justify-center p-3 rounded-lg border border-[var(--border-border)] bg-[var(--surface-muted)]">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1 block">
             Category Status
           </span>
           <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -204,25 +205,11 @@ function CategoryFormContent({
               className="w-4 h-4 rounded border-[var(--border-border)] text-[var(--brand-accent)] focus:ring-[var(--brand-accent)]"
             />
             <span className="text-sm font-medium text-[var(--text-primary)]">
-              Active (Visible in client navigation)
+              Active (Visible in client catalog navigation)
             </span>
           </label>
         </div>
       </div>
-
-      {imageUrl && (
-        <div className="p-3 bg-[var(--surface-muted)] rounded-lg border border-[var(--border-border)] flex items-center gap-3">
-          <img
-            src={imageUrl}
-            alt="Category Preview"
-            className="w-12 h-12 rounded object-cover border border-[var(--border-border)]"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
-          <span className="text-xs text-[var(--text-secondary)]">Image preview loaded</span>
-        </div>
-      )}
 
       <div className="pt-2 border-t border-[var(--border-border)]">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-3">

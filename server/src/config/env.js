@@ -63,6 +63,12 @@ const env = {
     loginMax: parseInt(process.env.AUTH_LOGIN_RATE_LIMIT, 10) || 10,
     registerMax: parseInt(process.env.AUTH_REGISTER_RATE_LIMIT, 10) || 5,
   },
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+    apiKey: process.env.CLOUDINARY_API_KEY || '',
+    apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+    folder: process.env.CLOUDINARY_FOLDER || 'skf_furniture',
+  },
 };
 
 /**

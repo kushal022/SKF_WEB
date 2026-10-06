@@ -130,11 +130,45 @@ import type {
 
 export * from '../../types/analytics';
 
+import type {
+  ThemeListResponseData,
+  ThemeDetailResponseData,
+  ThemePresetListResponseData,
+  ThemePresetDetailResponseData,
+  CreateThemePayload,
+  UpdateThemePayload,
+  CreateThemePresetPayload,
+  UpdateThemePresetPayload,
+} from '../../types/theme';
+
+export * from '../../types/theme';
+
+import type {
+  NotificationItem,
+  NotificationQueryParams,
+  PaginatedNotificationsResult,
+  CreateNotificationPayload,
+} from '../../types/notification';
+
+export * from '../../types/notification';
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data?: T;
   error?: string;
+}
+
+export interface UploadMediaResponseData {
+  url: string;
+  secure_url: string;
+  public_id: string;
+  format?: string;
+  width?: number | null;
+  height?: number | null;
+  bytes?: number;
+  original_filename?: string;
+  storage?: 'cloudinary' | 'local';
 }
 
 export interface SessionItem {
@@ -1328,6 +1362,96 @@ export const baseApi = createApi({
     }),
 
     // ==========================================
+    // Theme Settings & Presets (Step 13)
+    // ==========================================
+    getThemes: builder.query<ApiResponse<ThemeListResponseData>, void>({
+      query: () => '/admin/theme',
+      providesTags: ['Theme'],
+    }),
+
+    getThemeByPublicId: builder.query<ApiResponse<ThemeDetailResponseData>, string>({
+      query: (publicId) => `/admin/theme/${publicId}`,
+      providesTags: (_res, _err, publicId) => [{ type: 'Theme', id: publicId }],
+    }),
+
+    createTheme: builder.mutation<ApiResponse<ThemeDetailResponseData>, CreateThemePayload>({
+      query: (payload) => ({
+        url: '/admin/theme',
+        method: 'POST',
+        body: payload,
+      }),
+      invalidatesTags: ['Theme'],
+    }),
+
+    updateTheme: builder.mutation<
+      ApiResponse<ThemeDetailResponseData>,
+      { publicId: string; payload: UpdateThemePayload }
+    >({
+      query: ({ publicId, payload }) => ({
+        url: `/admin/theme/${publicId}`,
+        method: 'PATCH',
+        body: payload,
+      }),
+      invalidatesTags: (_res, _err, { publicId }) => [{ type: 'Theme', id: publicId }, 'Theme'],
+    }),
+
+    publishTheme: builder.mutation<ApiResponse<ThemeDetailResponseData>, string>({
+      query: (publicId) => ({
+        url: `/admin/theme/${publicId}/publish`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Theme', 'Settings'],
+    }),
+
+    getThemePresets: builder.query<ApiResponse<ThemePresetListResponseData>, void>({
+      query: () => '/admin/theme-presets',
+      providesTags: ['Theme'],
+    }),
+
+    getThemePresetByPublicId: builder.query<ApiResponse<ThemePresetDetailResponseData>, string>({
+      query: (publicId) => `/admin/theme-presets/${publicId}`,
+      providesTags: (_res, _err, publicId) => [{ type: 'Theme', id: publicId }],
+    }),
+
+    createThemePreset: builder.mutation<ApiResponse<ThemePresetDetailResponseData>, CreateThemePresetPayload>({
+      query: (payload) => ({
+        url: '/admin/theme-presets',
+        method: 'POST',
+        body: payload,
+      }),
+      invalidatesTags: ['Theme'],
+    }),
+
+    updateThemePreset: builder.mutation<
+      ApiResponse<ThemePresetDetailResponseData>,
+      { publicId: string; payload: UpdateThemePresetPayload }
+    >({
+      query: ({ publicId, payload }) => ({
+        url: `/admin/theme-presets/${publicId}`,
+        method: 'PATCH',
+        body: payload,
+      }),
+      invalidatesTags: ['Theme'],
+    }),
+
+    applyThemePreset: builder.mutation<
+      ApiResponse<ThemeDetailResponseData>,
+      { presetPublicId: string; themePublicId?: string | null }
+    >({
+      query: ({ presetPublicId, themePublicId }) => ({
+        url: `/admin/theme-presets/${presetPublicId}/apply`,
+        method: 'POST',
+        body: { theme_public_id: themePublicId || null },
+      }),
+      invalidatesTags: ['Theme', 'Settings'],
+    }),
+
+    getPublicTheme: builder.query<ApiResponse<ThemeDetailResponseData>, void>({
+      query: () => '/theme/public',
+      providesTags: ['Theme'],
+    }),
+
+    // ==========================================
     // Analytics & Dashboard Summary (Step 12)
     // ==========================================
     getDashboardSummary: builder.query<ApiResponse<DashboardSummaryData>, void>({
@@ -1364,6 +1488,105 @@ export const baseApi = createApi({
         { type: 'Quotations', id: publicId },
         { type: 'Quotations', id: 'LIST' },
       ],
+    }),
+
+    // Notifications (Step 14)
+    getNotifications: builder.query<ApiResponse<PaginatedNotificationsResult>, NotificationQueryParams | void>({
+      query: (params = {}) => ({
+        url: '/admin/notifications',
+        params: params || {},
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map(({ public_id }) => ({
+                type: 'Notifications' as const,
+                id: public_id,
+              })),
+              { type: 'Notifications', id: 'LIST' },
+            ]
+          : [{ type: 'Notifications', id: 'LIST' }],
+    }),
+
+    getNotificationByPublicId: builder.query<ApiResponse<{ notification: NotificationItem }>, string>({
+      query: (publicId) => `/admin/notifications/${publicId}`,
+      providesTags: (_res, _err, publicId) => [{ type: 'Notifications', id: publicId }],
+    }),
+
+    getUnreadNotificationCount: builder.query<number, void>({
+      query: () => ({
+        url: '/admin/notifications',
+        params: { is_read: 'false', limit: 1 },
+      }),
+      transformResponse: (response: ApiResponse<PaginatedNotificationsResult>) => {
+        return response.data?.pagination?.total ?? 0;
+      },
+      providesTags: [{ type: 'Notifications', id: 'UNREAD_COUNT' }],
+    }),
+
+    markNotificationAsRead: builder.mutation<ApiResponse<{ notification: NotificationItem }>, string>({
+      query: (publicId) => ({
+        url: `/admin/notifications/${publicId}/read`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_res, _err, publicId) => [
+        { type: 'Notifications', id: publicId },
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
+
+    markAllNotificationsAsRead: builder.mutation<ApiResponse<{ updated_count: number }>, void>({
+      query: () => ({
+        url: '/admin/notifications/read-all',
+        method: 'POST',
+      }),
+      invalidatesTags: [
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
+
+    deleteNotification: builder.mutation<ApiResponse<Record<string, never>>, string>({
+      query: (publicId) => ({
+        url: `/admin/notifications/${publicId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
+
+    createNotification: builder.mutation<ApiResponse<{ notification: NotificationItem }>, CreateNotificationPayload>({
+      query: (body) => ({
+        url: '/admin/notifications',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [
+        { type: 'Notifications', id: 'LIST' },
+        { type: 'Notifications', id: 'UNREAD_COUNT' },
+      ],
+    }),
+
+    // Media & Image Uploads (Cloudinary pipeline)
+    uploadMedia: builder.mutation<
+      ApiResponse<UploadMediaResponseData>,
+      { file: File; folder?: string }
+    >({
+      query: ({ file, folder }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (folder) {
+          formData.append('folder', folder);
+        }
+        return {
+          url: '/admin/uploads',
+          method: 'POST',
+          body: formData,
+        };
+      },
     }),
   }),
 });
@@ -1467,15 +1690,37 @@ export const {
   useUpdateReviewStatusMutation,
   useSetReviewFeaturedMutation,
   useDeleteReviewMutation,
-  // Business Settings
+  // Business & Website Settings
   useGetSettingsQuery,
   useUpdateSettingsMutation,
+  // Theme & Appearance (Step 13)
+  useGetThemesQuery,
+  useGetThemeByPublicIdQuery,
+  useCreateThemeMutation,
+  useUpdateThemeMutation,
+  usePublishThemeMutation,
+  useGetThemePresetsQuery,
+  useGetThemePresetByPublicIdQuery,
+  useCreateThemePresetMutation,
+  useUpdateThemePresetMutation,
+  useApplyThemePresetMutation,
+  useGetPublicThemeQuery,
   // Dashboard & Analytics
   useGetDashboardSummaryQuery,
   // Public Quotation Sharing
   useGetPublicQuotationQuery,
   useAcceptPublicQuotationMutation,
   useRejectPublicQuotationMutation,
+  // Notifications (Step 14)
+  useGetNotificationsQuery,
+  useGetNotificationByPublicIdQuery,
+  useGetUnreadNotificationCountQuery,
+  useMarkNotificationAsReadMutation,
+  useMarkAllNotificationsAsReadMutation,
+  useDeleteNotificationMutation,
+  useCreateNotificationMutation,
+  // Media / Cloudinary Uploads
+  useUploadMediaMutation,
 } = baseApi;
 
 export default baseApi;

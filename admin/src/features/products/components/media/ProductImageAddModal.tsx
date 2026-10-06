@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Input, Select, Button } from '../../../../components/ui';
+import { Modal, Input, Select, Button, ImageUpload } from '../../../../components/ui';
 import type { CreateImageRequest } from '../../../../types/catalog';
 
 interface ProductImageAddModalProps {
@@ -16,6 +16,7 @@ export function ProductImageAddModal({
   isLoading,
 }: ProductImageAddModalProps) {
   const [imageUrl, setImageUrl] = useState('');
+  const [publicCloudinaryId, setPublicCloudinaryId] = useState<string | null>(null);
   const [altText, setAltText] = useState('');
   const [imageType, setImageType] = useState('gallery');
   const [sortOrder, setSortOrder] = useState<number>(0);
@@ -27,13 +28,14 @@ export function ProductImageAddModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!imageUrl.trim()) {
-      setError('Image URL is required');
+      setError('Please select or upload a product image.');
       return;
     }
 
     try {
       await onSubmit({
         image_url: imageUrl.trim(),
+        public_cloudinary_id: publicCloudinaryId?.trim() || null,
         alt_text: altText.trim() || null,
         image_type: imageType || 'gallery',
         sort_order: Number(sortOrder) || 0,
@@ -41,6 +43,7 @@ export function ProductImageAddModal({
       });
       // reset
       setImageUrl('');
+      setPublicCloudinaryId(null);
       setAltText('');
       setImageType('gallery');
       setSortOrder(0);
@@ -57,40 +60,29 @@ export function ProductImageAddModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Add Product Image"
-      description="Add a high-resolution product photograph or render to this product's gallery."
+      description="Upload a high-resolution product photograph or render to this product's gallery."
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Image URL *"
-          placeholder="https://images.skffurniture.com/products/bed-angle-1.webp"
+        <ImageUpload
+          label="Product Photograph / Render"
           value={imageUrl}
-          onChange={(e) => {
-            setImageUrl(e.target.value);
+          publicId={publicCloudinaryId}
+          onChange={(url, publicId) => {
+            setImageUrl(url);
+            if (publicId) setPublicCloudinaryId(publicId);
             if (error) setError('');
           }}
+          onRemove={() => {
+            setImageUrl('');
+            setPublicCloudinaryId(null);
+          }}
+          folder="products"
+          required
           error={error}
           disabled={isLoading}
-          helperText="Direct HTTP/HTTPS link to image asset"
-          required
+          helperText="Upload studio product photography, render, or dimension drawing (PNG, JPG, WEBP up to 10MB)"
         />
-
-        {imageUrl && (
-          <div className="p-3 bg-[var(--surface-muted)] rounded-lg border border-[var(--border-border)] flex items-center gap-3">
-            <img
-              src={imageUrl}
-              alt="Asset Preview"
-              className="w-16 h-16 rounded object-cover border border-[var(--border-border)]"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
-            <div className="text-xs text-[var(--text-secondary)]">
-              <p className="font-medium text-[var(--text-primary)]">Image Asset Preview</p>
-              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">Asset successfully loaded</p>
-            </div>
-          </div>
-        )}
 
         <Input
           label="Alt Text (SEO & Accessibility)"

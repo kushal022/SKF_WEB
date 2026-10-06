@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:e2e": "node scripts/test-client-phase1.mjs",
+    "test:phase2": "node scripts/test-client-phase2.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.49.0",

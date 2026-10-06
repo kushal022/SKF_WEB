@@ -40,7 +40,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
 
   // Security: Do NOT cache API requests or sensitive operations
-  if (url.pathname.startsWith('/api') || url.port === '5000') {
+  if (url.pathname.startsWith('/api') || url.port === '7000' || url.port === '5000') {
     return;
   }
 

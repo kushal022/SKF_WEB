@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node test-api-foundation.js && node test-auth.js && node test-admin.js && node test-step4-settings-theme.js && node test-step5-categories.js && node test-step6-products.js && node test-step7-product-media.js && node test-step8-enquiries.js && node test-step9-custom-requests.js && node test-step10-b2b.js && node test-step11-gallery-reviews.js && node test-step12-quotations.js && node test-step13-orders.js && node test-step14-payments.js && node test-step15-notifications.js && node test-step16-audit-logs.js && node test-step17-hardening.js",
+    "test": "node test-api-foundation.js && node test-auth.js && node test-admin.js && node test-step4-settings-theme.js && node test-step5-categories.js && node test-step6-products.js && node test-step7-product-media.js && node test-step8-enquiries.js && node test-step9-custom-requests.js && node test-step10-b2b.js && node test-step11-gallery-reviews.js && node test-step12-quotations.js && node test-step13-orders.js && node test-step14-payments.js && node test-step15-notifications.js && node test-step16-audit-logs.js && node test-step17-hardening.js && node test-step-upload-pipeline.js",
+    "test:upload": "node test-step-upload-pipeline.js",
     "test:auth": "node test-auth.js",
     "test:admin": "node test-admin.js",
     "test:step4": "node test-step4-settings-theme.js",
@@ -35,6 +36,7 @@
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^18.0.5",
@@ -43,6 +45,7 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "knex": "^3.3.0",
+    "multer": "^2.4.0",
     "mysql2": "^3.24.5",
     "objection": "^3.1.5",
     "zod": "^4.6.5"

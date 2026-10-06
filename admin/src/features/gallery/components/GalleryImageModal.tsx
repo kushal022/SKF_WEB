@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
-import { useToast } from '../../../components/ui';
+import { useToast, ImageUpload } from '../../../components/ui';
 import {
   useAddGalleryImageMutation,
   useUpdateGalleryImageMutation,
@@ -40,14 +40,7 @@ function GalleryImageFormContent({ galleryPublicId, image, onClose }: InnerImage
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!imageUrl.trim()) {
-      setErrorMsg('Image URL is required.');
-      return;
-    }
-
-    try {
-      new URL(imageUrl.trim());
-    } catch {
-      setErrorMsg('Image URL must be a valid HTTP/HTTPS link.');
+      setErrorMsg('Please select or upload a project image.');
       return;
     }
 
@@ -96,22 +89,26 @@ function GalleryImageFormContent({ galleryPublicId, image, onClose }: InnerImage
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
-          Image URL <span className="text-[var(--color-error-500)]">*</span>
-        </label>
-        <Input
-          type="url"
-          value={imageUrl}
-          onChange={(e) => {
-            setImageUrl(e.target.value);
-            if (errorMsg) setErrorMsg('');
-          }}
-          placeholder="https://res.cloudinary.com/.../finished_dining_set.jpg"
-          required
-          autoFocus
-        />
-      </div>
+      <ImageUpload
+        label="Project Photograph"
+        value={imageUrl}
+        publicId={cloudinaryPublicId}
+        onChange={(url, publicId) => {
+          setImageUrl(url);
+          if (publicId !== undefined) {
+            setCloudinaryPublicId(publicId);
+          }
+          if (errorMsg) setErrorMsg('');
+        }}
+        onRemove={() => {
+          setImageUrl('');
+          setCloudinaryPublicId('');
+        }}
+        folder="gallery"
+        required
+        disabled={isLoading}
+        helperText="Upload showcase architectural render or photo (PNG, JPG, WEBP up to 10MB)"
+      />
 
       <div>
         <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
@@ -134,7 +131,7 @@ function GalleryImageFormContent({ galleryPublicId, image, onClose }: InnerImage
             type="text"
             value={cloudinaryPublicId}
             onChange={(e) => setCloudinaryPublicId(e.target.value)}
-            placeholder="e.g. skf_gallery/penthouse_dining_1"
+            placeholder="Auto-populated on upload or enter custom ID"
           />
         </div>
 
@@ -151,23 +148,6 @@ function GalleryImageFormContent({ galleryPublicId, image, onClose }: InnerImage
           />
         </div>
       </div>
-
-      {/* Live Preview */}
-      {imageUrl && (
-        <div className="pt-2">
-          <span className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
-            Image Preview
-          </span>
-          <div className="h-44 rounded-lg border border-[var(--border-border)] overflow-hidden bg-black/20 flex items-center justify-center">
-            <img
-              src={imageUrl}
-              alt="Preview"
-              className="h-full w-full object-contain"
-              onError={() => setErrorMsg('Failed to load image preview from the URL provided.')}
-            />
-          </div>
-        </div>
-      )}
 
       <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-border)]">
         <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>

@@ -21,7 +21,10 @@ import GalleryDetailPage from '../../features/gallery/pages/GalleryDetailPage';
 import ReviewListPage from '../../features/reviews/pages/ReviewListPage';
 import PublicQuotationPage from '../../features/quotations/pages/PublicQuotationPage';
 import BusinessSettingsPage from '../../features/settings/pages/BusinessSettingsPage';
+import WebsiteSettingsPage from '../../features/settings/pages/WebsiteSettingsPage';
+import ThemePage from '../../features/theme/pages/ThemePage';
 import AnalyticsPage from '../../features/analytics/pages/AnalyticsPage';
+import NotificationCenterPage from '../../features/notifications/pages/NotificationCenterPage';
 import { EmptyState } from '../../components/ui';
 
 function StepPlaceholder({ stepTitle, description }: { stepTitle: string; description: string }) {
@@ -92,9 +95,13 @@ export function AppRouter() {
         <Route path="/gallery" element={<Navigate to="/admin/gallery" replace />} />
         <Route path="/gallery/:id" element={<GalleryDetailRedirect />} />
         <Route path="/reviews" element={<Navigate to="/admin/reviews" replace />} />
-        <Route path="/settings" element={<Navigate to="/admin/settings/business" replace />} />
+        <Route path="/settings" element={<Navigate to="/admin/settings" replace />} />
+        <Route path="/settings/website" element={<Navigate to="/admin/settings" replace />} />
         <Route path="/settings/business" element={<Navigate to="/admin/settings/business" replace />} />
+        <Route path="/theme" element={<Navigate to="/admin/theme" replace />} />
+        <Route path="/theme-settings" element={<Navigate to="/admin/theme" replace />} />
         <Route path="/analytics" element={<Navigate to="/admin/analytics" replace />} />
+        <Route path="/notifications" element={<Navigate to="/admin/notifications" replace />} />
 
         {/* Protected Admin Routes */}
         <Route
@@ -140,13 +147,22 @@ export function AppRouter() {
           {/* Customer Reviews & Moderation */}
           <Route path="reviews" element={<ReviewListPage />} />
 
-          {/* Business & Website Settings (Step 11) */}
-          <Route path="settings" element={<Navigate to="/admin/settings/business" replace />} />
+          {/* Website Settings (Step 13) */}
+          <Route path="settings" element={<WebsiteSettingsPage />} />
+          <Route path="settings/website" element={<WebsiteSettingsPage />} />
+
+          {/* Theme & Appearance (Step 13) */}
+          <Route path="theme" element={<ThemePage />} />
+          <Route path="theme-settings" element={<ThemePage />} />
+
+          {/* Business Settings (Step 11) */}
           <Route path="settings/business" element={<BusinessSettingsPage />} />
-          <Route path="theme-settings" element={<BusinessSettingsPage />} />
 
           {/* Basic Analytics & KPI Telemetry (Step 12) */}
           <Route path="analytics" element={<AnalyticsPage />} />
+
+          {/* Notifications Center (Step 14) */}
+          <Route path="notifications" element={<NotificationCenterPage />} />
           <Route
             path="audit"
             element={

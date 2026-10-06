@@ -11,6 +11,8 @@ import {
   Images,
   Star,
   Building2,
+  Globe,
+  Palette,
   BarChart3,
   Shield,
   Menu,
@@ -22,6 +24,7 @@ import {
   LogOut,
   KeyRound,
   User,
+  Bell,
 } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { useAppDispatch, useAppSelector } from '../app/store';
@@ -29,6 +32,7 @@ import { useLogoutUserMutation, baseApi } from '../app/store/api';
 import { logout } from '../features/auth/authSlice';
 import { useToast } from '../components/ui';
 import { Drawer, Button, OfflineBanner, Badge } from '../components/ui';
+import NotificationBell from '../components/notifications/NotificationBell';
 
 interface NavItem {
   name: string;
@@ -108,15 +112,32 @@ export function AdminLayout() {
       icon: <Star className="w-5 h-5" />,
     },
     {
+      name: 'Website Settings',
+      path: '/admin/settings',
+      icon: <Globe className="w-5 h-5" />,
+    },
+    {
+      name: 'Theme & Appearance',
+      path: '/admin/theme',
+      icon: <Palette className="w-5 h-5" />,
+      badge: 'Step 13',
+    },
+    {
       name: 'Business Settings',
       path: '/admin/settings/business',
       icon: <Building2 className="w-5 h-5" />,
     },
     {
+      name: 'Notifications',
+      path: '/admin/notifications',
+      icon: <Bell className="w-5 h-5" />,
+      badge: 'Step 14',
+    },
+    {
       name: 'Security & Audit',
       path: '/admin/audit',
       icon: <Shield className="w-5 h-5" />,
-      badge: 'Next Step',
+      badge: 'Step 15',
     },
   ];
 
@@ -373,6 +394,9 @@ export function AdminLayout() {
                   Install PWA
                 </Button>
               )}
+
+              {/* Notification Bell */}
+              <NotificationBell />
 
               {/* Admin Profile Area */}
               <div className="flex items-center gap-3 pl-3 border-l border-[var(--border-border)]">

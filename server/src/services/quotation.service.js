@@ -901,6 +901,24 @@ const acceptPublicQuotation = async (publicId, req) => {
   }
 
   const updated = await updateQuotationStatus(publicId, { status: 'accepted', comment: 'Accepted by customer via public link' }, req);
+
+  try {
+    const notificationService = require('./notification.service');
+    await notificationService.createForAdmins({
+      type: 'quotation',
+      title: 'Quotation Accepted by Customer',
+      message: `Quotation ${quotation.quotation_number} accepted by ${quotation.customer_name}. Total: Rs. ${quotation.total_amount}`,
+      data: {
+        quotation_public_id: quotation.public_id,
+        quotation_number: quotation.quotation_number,
+        total_amount: quotation.total_amount,
+      },
+      related_entity_type: 'Quotation',
+    });
+  } catch {
+    // Non-blocking notification dispatch
+  }
+
   return sanitizePublicQuotation(updated);
 };
 
@@ -923,6 +941,23 @@ const rejectPublicQuotation = async (publicId, { reason } = {}, req) => {
 
   const comment = reason?.trim() ? `Customer rejection reason: ${reason.trim()}` : 'Rejected by customer via public link';
   const updated = await updateQuotationStatus(publicId, { status: 'rejected', comment }, req);
+
+  try {
+    const notificationService = require('./notification.service');
+    await notificationService.createForAdmins({
+      type: 'quotation',
+      title: 'Quotation Declined by Customer',
+      message: `Quotation ${quotation.quotation_number} declined by ${quotation.customer_name}${reason ? `: ${reason}` : ''}`,
+      data: {
+        quotation_public_id: quotation.public_id,
+        quotation_number: quotation.quotation_number,
+      },
+      related_entity_type: 'Quotation',
+    });
+  } catch {
+    // Non-blocking notification dispatch
+  }
+
   return sanitizePublicQuotation(updated);
 };
 
