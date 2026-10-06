@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "node test-api-foundation.js && node test-auth.js && node test-admin.js && node test-step4-settings-theme.js && node test-step5-categories.js && node test-step6-products.js && node test-step7-product-media.js && node test-step8-enquiries.js && node test-step9-custom-requests.js && node test-step10-b2b.js && node test-step11-gallery-reviews.js && node test-step12-quotations.js && node test-step13-orders.js && node test-step14-payments.js && node test-step15-notifications.js && node test-step16-audit-logs.js && node test-step17-hardening.js && node test-step-upload-pipeline.js",
+    "test": "node test-api-foundation.js && node test-auth.js && node test-admin.js && node test-step4-settings-theme.js && node test-step5-categories.js && node test-step6-products.js && node test-step7-product-media.js && node test-step8-enquiries.js && node test-step9-custom-requests.js && node test-step10-b2b.js && node test-step11-gallery-reviews.js && node test-step12-quotations.js && node test-step13-orders.js && node test-step14-payments.js && node test-step15-notifications.js && node test-step16-audit-logs.js && node test-step17-hardening.js && node test-step-upload-pipeline.js && node test-step-realtime-notifications.js",
+    "test:socket": "node test-step-realtime-notifications.js",
     "test:upload": "node test-step-upload-pipeline.js",
     "test:auth": "node test-auth.js",
     "test:admin": "node test-admin.js",
@@ -48,9 +49,11 @@
     "multer": "^2.4.0",
     "mysql2": "^3.24.5",
     "objection": "^3.1.5",
+    "socket.io": "^4.8.4",
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "socket.io-client": "^4.8.4"
   }
 }

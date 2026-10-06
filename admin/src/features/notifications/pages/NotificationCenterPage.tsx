@@ -125,7 +125,11 @@ export function NotificationCenterPage() {
   const [markAllAsRead, { isLoading: isMarkingAll }] = useMarkAllNotificationsAsReadMutation();
   const [deleteNotification, { isLoading: isDeleting }] = useDeleteNotificationMutation();
 
-  const items = notificationsData?.data?.items || [];
+  const rawItems = notificationsData?.data?.items || [];
+  // Strict deduplication by public_id ensures each notification renders only once
+  const items = Array.from(
+    new Map(rawItems.map((item) => [item.public_id, item])).values()
+  );
   const pagination = notificationsData?.data?.pagination || {
     total: 0,
     page: 1,

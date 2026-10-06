@@ -33,6 +33,8 @@ import { logout } from '../features/auth/authSlice';
 import { useToast } from '../components/ui';
 import { Drawer, Button, OfflineBanner, Badge } from '../components/ui';
 import NotificationBell from '../components/notifications/NotificationBell';
+import { useNotificationSocket } from '../hooks/useNotificationSocket';
+import { disconnectSocket } from '../services/socket';
 
 interface NavItem {
   name: string;
@@ -46,6 +48,9 @@ export function AdminLayout() {
   const dispatch = useAppDispatch();
   const { showToast } = useToast();
   const { user } = useAppSelector((state) => state.auth);
+
+  // Initialize and maintain real-time notification socket lifecycle
+  useNotificationSocket();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -149,6 +154,7 @@ export function AdminLayout() {
       // Even if network request fails, clear local authentication state
       showToast('info', 'Signed out locally.', 'Session Closed');
     } finally {
+      disconnectSocket();
       dispatch(logout());
       dispatch(baseApi.util.resetApiState());
       navigate('/login', { replace: true });

@@ -1,7 +1,9 @@
+const http = require('http');
 const config = require('./config');
 const app = require('./app');
 const { knex } = require('./db');
 const { testConnection } = require('./db/test-connection');
+const { initSocketServer, closeSocketServer, getIo } = require('./socket');
 
 let server = null;
 let isShuttingDown = false;
@@ -29,7 +31,15 @@ const gracefulShutdown = async (signal, exitProcess = true) => {
     forceExitTimeout.unref();
   }
 
-  // 1 & 2. Stop accepting new HTTP connections and close HTTP server
+  // 1. Close Socket.IO connections
+  try {
+    closeSocketServer();
+    console.log('[Socket] Socket.IO server closed.');
+  } catch (err) {
+    console.error('[Socket] Error closing Socket.IO:', err.message);
+  }
+
+  // 2. Stop accepting new HTTP connections and close HTTP server
   if (server) {
     await new Promise((resolve) => {
       server.close((err) => {
@@ -71,11 +81,15 @@ async function startServer() {
     // 2. Test database connection
     await testConnection();
 
-    // 3. Start HTTP server
+    // 3. Start HTTP server with Socket.IO integration
     const PORT = config.port;
-    server = app.listen(PORT, () => {
+    const httpServer = http.createServer(app);
+    initSocketServer(httpServer);
+
+    server = httpServer.listen(PORT, () => {
       console.log(`[Server] SKF Furniture API running on port ${PORT} [${config.nodeEnv}]`);
       console.log(`[Server] Versioned API prefix mounted at ${config.apiPrefix}`);
+      console.log('[Server] Socket.IO real-time engine attached');
     });
 
     // 4. Register signal listeners for graceful shutdown
@@ -98,4 +112,5 @@ module.exports = {
   app,
   startServer,
   gracefulShutdown,
+  getIo,
 };

@@ -26,6 +26,28 @@ const parseAllowedOrigins = () => {
     .filter(Boolean);
 };
 
+const parseSocketAllowedOrigins = () => {
+  const socketOriginEnv = process.env.SOCKET_CORS_ORIGIN;
+  if (socketOriginEnv && socketOriginEnv.trim() !== '') {
+    return socketOriginEnv
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+  }
+  const defaultOrigins = parseAllowedOrigins();
+  const additional = [
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
+    'https://admin.skffurniture.com',
+  ];
+  for (const origin of additional) {
+    if (!defaultOrigins.includes(origin)) {
+      defaultOrigins.push(origin);
+    }
+  }
+  return defaultOrigins;
+};
+
 const env = {
   nodeEnv,
   isProduction,
@@ -35,6 +57,9 @@ const env = {
   apiPrefix: process.env.API_PREFIX || '/api/v1',
   cors: {
     allowedOrigins: parseAllowedOrigins(),
+  },
+  socket: {
+    corsOrigins: parseSocketAllowedOrigins(),
   },
   db: {
     host: process.env.DB_HOST || '127.0.0.1',

@@ -101,7 +101,11 @@ export function NotificationBell() {
   const [markAsRead] = useMarkNotificationAsReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAll }] = useMarkAllNotificationsAsReadMutation();
 
-  const notifications = notificationsData?.data?.items || [];
+  const rawNotifications = notificationsData?.data?.items || [];
+  // Strict deduplication by public_id prevents duplicate items from socket updates + refetches
+  const notifications = Array.from(
+    new Map(rawNotifications.map((item) => [item.public_id, item])).values()
+  );
 
   // Close dropdown on outside click or Escape
   useEffect(() => {

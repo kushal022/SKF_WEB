@@ -108,7 +108,29 @@ const createNotification = async (data, trx = null) => {
     related_entity_id: data.related_entity_id || null,
   });
 
-  return getNotificationByPublicId(notification.public_id);
+  const createdNotification = await getNotificationByPublicId(notification.public_id);
+
+  // Emit real-time notification via Socket.IO
+  try {
+    const notificationSocket = require('../socket/notification.socket');
+    const emitEvent = () => {
+      notificationSocket.emitNewNotification({
+        ...createdNotification,
+        user_id: userId,
+      });
+    };
+
+    if (trx && typeof trx.executionPromise?.then === 'function') {
+      trx.executionPromise.then(emitEvent).catch(() => {});
+    } else {
+      emitEvent();
+    }
+  } catch (socketErr) {
+    // Non-blocking failsafe: socket failure must never disrupt database operations
+    console.error('[Socket] Real-time notification emission failed:', socketErr.message);
+  }
+
+  return createdNotification;
 };
 
 const createForUser = async (userPublicId, notificationData, trx = null) => {
