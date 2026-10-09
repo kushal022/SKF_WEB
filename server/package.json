@@ -27,6 +27,7 @@
     "test:step17": "node test-step17-hardening.js",
     "db:test": "node src/db/test-connection.js",
     "db:migrate": "knex --knexfile knexfile.js migrate:latest",
+    "db:seed": "knex --knexfile knexfile.js seed:run",
     "db:rollback": "knex --knexfile knexfile.js migrate:rollback",
     "db:status": "knex --knexfile knexfile.js migrate:status",
     "db:make": "knex --knexfile knexfile.js migrate:make"

@@ -167,6 +167,11 @@ const errorHandler = (err, req, res, next) => {
     details = undefined;
   }
 
+  // Log internal errors to console for developer visibility
+  if (!isProduction && statusCode >= 500) {
+    console.error(`[Server Error] ${req.method} ${req.originalUrl || req.url}:`, err);
+  }
+
   // Sanitize for production: never expose stack traces, SQL, or internal details
   if (isProduction) {
     stack = undefined;

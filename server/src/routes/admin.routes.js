@@ -141,7 +141,7 @@ const {
 const router = express.Router();
 
 // Enforce authentication and administrative role authorization across all admin routes
-router.use(authenticate, authorizeRoles('admin'));
+router.use(authenticate, authorizeRoles('admin', 'super_admin'));
 
 // ==================== MEDIA / UPLOADS ====================
 router.post('/uploads', uploadSingle('file'), uploadController.uploadImage);

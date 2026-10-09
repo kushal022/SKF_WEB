@@ -4,8 +4,26 @@
  * specifications, gallery installations, and approved customer reviews.
  */
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 exports.seed = async function (knex) {
+  // 0. Default Admin User
+  const existingAdmin = await knex('users').where({ email: 'admin@skffurniture.com' }).first();
+  if (!existingAdmin) {
+    const password_hash = await bcrypt.hash('123456', 10);
+    await knex('users').insert({
+      public_id: crypto.randomUUID(),
+      name: 'SKF Super Admin',
+      email: 'admin@skffurniture.com',
+      phone: '+91 9999999999',
+      password_hash,
+      role: 'admin',
+      status: 'active',
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+  }
+
   // 1. Categories
   const categoriesData = [
     {
@@ -796,6 +814,93 @@ exports.seed = async function (knex) {
         updated_at: new Date(),
       });
     }
+  }
+
+  // 5. Default Estimator Rule
+  const existingRule = await knex('estimator_rules').where({ name: 'Standard SS Furniture Rule' }).first();
+  if (!existingRule) {
+    await knex('estimator_rules').insert({
+      public_id: crypto.randomUUID(),
+      name: 'Standard SS Furniture Rule',
+      product_type: null,
+      material: null,
+      finish: null,
+      dimension_multiplier: 1500,
+      material_rate: 0,
+      finish_adjustment: 0,
+      base_rate: 5000,
+      priority: 1,
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+  }
+
+  // 6. Default Website Settings
+  const existingSettings = await knex('website_settings').first();
+  if (!existingSettings) {
+    await knex('website_settings').insert({
+      public_id: crypto.randomUUID(),
+      site_name: 'SKF Stainless Steel Furniture',
+      tagline: 'Premium Stainless Steel Craftsmanship',
+      phone: '+91 9887766554',
+      email: 'contact@skffurniture.com',
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+  }
+
+  // 7. Demo Quotations for Customer Quotation Portal Verification
+  const sentQuoteId = '91fac6bb-e97a-416b-821a-1d6bbb42d270';
+  const existingSent = await knex('quotations').where({ public_id: sentQuoteId }).first();
+  if (!existingSent) {
+    const [qId] = await knex('quotations').insert({
+      public_id: sentQuoteId,
+      quotation_number: 'SKF-QT-2026-000088',
+      customer_name: 'Priya Sharma (Interior Designer)',
+      customer_phone: '+91 98210 33333',
+      customer_email: 'priya@studiospace.com',
+      subtotal: 45000,
+      total_amount: 45000,
+      status: 'sent',
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+    await knex('quotation_items').insert({
+      public_id: crypto.randomUUID(),
+      quotation_id: qId,
+      description: 'Custom Stainless Steel Console Table - Gold PVD Finish',
+      quantity: 1,
+      unit_price: 45000,
+      line_total: 45000,
+      created_at: new Date(),
+    });
+  }
+
+  const draftQuoteId = '4bdde49b-007f-4e5c-a6fd-9f999a8dcb84';
+  const existingDraft = await knex('quotations').where({ public_id: draftQuoteId }).first();
+  if (!existingDraft) {
+    const [qId] = await knex('quotations').insert({
+      public_id: draftQuoteId,
+      quotation_number: 'SKF-QT-2026-000089',
+      customer_name: 'Confidential Internal Draft Client',
+      customer_phone: '+91 98210 44444',
+      customer_email: 'draft@internal.com',
+      subtotal: 10000,
+      total_amount: 10000,
+      status: 'draft',
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+    await knex('quotation_items').insert({
+      public_id: crypto.randomUUID(),
+      quotation_id: qId,
+      description: 'Internal Review Draft Item',
+      quantity: 1,
+      unit_price: 10000,
+      line_total: 10000,
+      created_at: new Date(),
+    });
   }
 
   console.log('[Seed] SKF Public Production Seed executed successfully!');
